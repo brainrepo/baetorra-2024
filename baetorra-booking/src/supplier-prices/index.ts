@@ -3,6 +3,7 @@ import { computed, ref, toRefs, watch } from "vue";
 import LayoutComponent from "./layout.vue";
 import { defineLayout } from "@directus/shared/utils";
 import { useCollection, useItems } from "@directus/extensions-sdk";
+import { generateTimetable } from "./utils/timetable";
 
 export default defineLayout({
   id: "custom",
@@ -31,11 +32,15 @@ export default defineLayout({
         "sellers.id",
         "sellers.directus_users_id.first_name",
         "sellers.directus_users_id.last_name",
-        "service",
+        "sellers.directus_users_id.id",
+        "service.name",
         "variant.id",
         "service.id",
         "variant.name",
         "service.name",
+        "price",
+        "fee",
+        "status",
       ];
     });
 
@@ -48,27 +53,19 @@ export default defineLayout({
       search: search,
     });
 
-    console.log(filter.value, search.value);
+    const timetable = ref();
 
-    const { items: services } = useItems(ref("service"), {
-      sort: ref("id"),
-      page: ref(1),
-      limit: ref(10000),
-      fields: ref([
-        "id",
-        "name",
-        "variants.id",
-        "variants.name",
-        "sellers.directus_users_id.first_name",
-        "sellers.directus_users_id.last_name",
-        "sellers.directus_users_id.id_name",
-      ]),
-      filter: ref({ status: { _neq: "archived" } }),
-      search: ref({}),
-    });
+    watch(
+      items,
+      (data) => {
+        console.log("generate timetable");
+        timetable.value = generateTimetable(data);
+      },
+      {
+        immediate: true,
+      }
+    );
 
-    console.log(services.value);
-
-    return { name, collection, filter, search, items, services };
+    return { name, collection, filter, search, items, timetable };
   },
 });

@@ -26,7 +26,12 @@ export default defineComponent({
     };
 
 
-    isWeekend.value = isWeekendCheck(date.value)
+    watch(date, 
+      () => isWeekend.value = isWeekendCheck(date.value),
+      {
+        immediate: true
+      }
+    )
     return {formatDateWeekDay, formatDateDay, formatDateMonth, isWeekend }
   },
 });

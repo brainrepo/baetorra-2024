@@ -69,6 +69,5 @@ export const addDay = (from: string, amount: number) => {
 };
 
 export const formatDate = (date: Date) => {
-  console.log(date);
   return format(date, "yyyy-MM-dd");
 };
