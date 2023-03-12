@@ -1,0 +1,36 @@
+{
+  "name": "directus-extension-baetorra-booking",
+  "version": "1.0.0",
+  "directus:extension": {
+    "host": "^9.22.4",
+    "type": "bundle",
+    "path": {
+      "app": "dist/app.js",
+      "api": "dist/api.js"
+    },
+    "entries": [
+      {
+        "type": "layout",
+        "name": "supplier-prices",
+        "source": "src/supplier-prices/index.ts"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "dev": "directus-extension build -w --no-minify",
+    "link": "directus-extension link",
+    "add": "directus-extension add"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.22.4",
+    "sass": "^1.58.3",
+    "sass-loader": "^13.2.0",
+    "typescript": "^4.9.5",
+    "vue": "^3.2.47"
+  },
+  "dependencies": {
+    "date-fns": "^2.29.3",
+    "frappe-gantt": "^0.6.1"
+  }
+}
