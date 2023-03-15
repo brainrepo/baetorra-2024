@@ -2,11 +2,18 @@
 import { defineComponent, toRefs, watch, ref } from "vue";
 import DayCell from "./day-cell.vue";
 import PriceCell from "./price-cell.vue";
+import SellerCell from "./seller-cell.vue";
+import VariantCell from "./variant-cell.vue";
 import { numDays, addDay, formatDate } from "../utils/utils";
 
 export default defineComponent({
   name: "v-timeline",
-  components: { "v-daycell": DayCell, "v-pricecell": PriceCell },
+  components: {
+    "v-daycell": DayCell,
+    "v-pricecell": PriceCell,
+    "v-sellercell": SellerCell,
+    "v-variantcell": VariantCell,
+  },
   props: {
     timetable: {
       type: Object,
@@ -59,6 +66,7 @@ export default defineComponent({
             style="
               background-color: var(--primary) !important;
               color: var(--foreground-inverted);
+              position: sticky;
             "
           >
             {{ service.name }}
@@ -66,19 +74,27 @@ export default defineComponent({
         </tr>
         <template v-for="seller in service.sellers">
           <tr>
-            <td>
-              <div style="sticky">{{ seller.name }}</div>
-            </td>
+            <v-sellercell :name="seller.name"></v-sellercell>
             <td
               :colspan="calendar.length"
               style="background-color: var(--background-subdued)"
             ></td>
           </tr>
-          <tr v-for="(variant, index) in seller.variants">
-            <td style="padding-left: 10px; border-left: 8px solid white">
-              {{ variant.name }}
-            </td>
-            <td v-for="day in calendar">
+
+          <tr v-for="(variant, _, index) in seller.variants">
+            <v-variantcell :name="variant.name" :class="
+                index === Object.keys(seller.variants).length - 1
+                  ? ''
+                  : 'borderbottom'
+              "></v-variantcell>
+            <td
+              v-for="day in calendar"
+              :class="
+                index === Object.keys(seller.variants).length - 1
+                  ? ''
+                  : 'borderbottom'
+              "
+            >
               <v-pricecell
                 v-if="variant?.prices?.[formatDate(day)]"
                 :price="variant.prices[formatDate(day)]"
@@ -102,7 +118,7 @@ export default defineComponent({
     td:first-child {
       position: sticky;
       left: 0;
-      background-color: var(--background-normal);
+      //background-color: var(--background-normal);
       font-size: 12px;
       padding: 6px;
       border-radius: 4px;
@@ -110,7 +126,10 @@ export default defineComponent({
 
     td {
       min-width: 80px;
-      max-width: 80px;
+      max-width: 100px;
+    }
+    td.borderbottom {
+      border-bottom: 1px dashed var(--foreground-subdued);
     }
   }
 }

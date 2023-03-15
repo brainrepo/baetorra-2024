@@ -15,13 +15,13 @@ export default defineComponent({
 </script>
 
 <template>
-  <th>
+  <td>
     <div class="big">{{formatNum(price.price) }}</div>
     <div class="bottom">
       FEE:
       {{ formatNum(price.fee)  }}
     </div>
-  </th>
+  </td>
 </template>
 
 <style lang="scss" scoped="true">
