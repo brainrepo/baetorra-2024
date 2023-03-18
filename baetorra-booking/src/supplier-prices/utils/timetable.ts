@@ -96,7 +96,7 @@ export function generateTimetable(items: Items) {
         maxDate = item.to;
       }
 
-      for (let i = 0; i < dateDiff; i++) {
+      for (let i = 0; i <= dateDiff; i++) {
         const day = addDay(item.from, i);
 
         timetable[item.service.id].sellers[
