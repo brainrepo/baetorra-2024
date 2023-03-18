@@ -36,11 +36,13 @@ export default defineLayout({
         "service.name",
         "variant.id",
         "service.id",
+        "shift.name",
         "variant.name",
         "service.name",
         "price",
         "fee",
         "status",
+        "color",
       ];
     });
 
@@ -58,8 +60,8 @@ export default defineLayout({
     watch(
       items,
       (data) => {
-        console.log("generate timetable");
         timetable.value = generateTimetable(data);
+        console.log("generate timetable", timetable.value);
       },
       {
         immediate: true,
