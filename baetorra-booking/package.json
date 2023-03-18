@@ -13,6 +13,11 @@
         "type": "layout",
         "name": "supplier-prices",
         "source": "src/supplier-prices/index.ts"
+      },
+       {
+        "type": "layout",
+        "name": "supplier-availability",
+        "source": "src/supplier-availability/index.ts"
       }
     ]
   },

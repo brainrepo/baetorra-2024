@@ -6,8 +6,8 @@ import { useCollection, useItems } from "@directus/extensions-sdk";
 import { generateTimetable } from "./utils/timetable";
 
 export default defineLayout({
-  id: "supplier-price-timeline",
-  name: "Supplier price timeline",
+  id: "supplier-availability-timeline",
+  name: "Supplier availability timeline",
   icon: "calendar_month",
   component: LayoutComponent,
   slots: {
@@ -25,23 +25,15 @@ export default defineLayout({
     const queryFields = computed(() => {
       return [
         "id",
-        "from",
-        "to",
+        "date",
+        "amount",
         "name",
-        "variant",
-        "sellers.id",
-        "sellers.directus_users_id.first_name",
-        "sellers.directus_users_id.last_name",
-        "sellers.directus_users_id.id",
-        "service.name",
-        "variant.id",
         "service.id",
+        "shift.id",
         "shift.name",
-        "variant.name",
+        "resource.id",
+        "resource.name",
         "service.name",
-        "price",
-        "fee",
-        "status",
         "color",
       ];
     });
@@ -60,7 +52,9 @@ export default defineLayout({
     watch(
       items,
       (data) => {
+        console.log(data);
         timetable.value = generateTimetable(data);
+        //timetable.value = data;
         console.log("generate timetable", timetable.value);
       },
       {
