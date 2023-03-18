@@ -47,6 +47,22 @@ export default defineLayout({
       search: search,
     });
 
+    const { items: services } = useItems(ref("service"), {
+      sort: computed(() => ["name"]),
+      page: ref(1),
+      limit: ref(10000),
+      fields: [
+        "id",
+        "name",
+        "resources.id",
+        "resources.name",
+        "shifts.id",
+        "shifts.name",
+      ],
+      filter,
+      search: search,
+    });
+
     const timetable = ref();
 
     watch(
@@ -62,6 +78,10 @@ export default defineLayout({
       }
     );
 
-    return { name, collection, filter, search, items, timetable };
+    watch(services, (data) => console.log(data), {
+      immediate: true,
+    });
+
+    return { name, collection, filter, search, items, timetable, services };
   },
 });

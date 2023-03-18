@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-gantt  :timetable="timetable" />
+    <v-gantt  :timetable="timetable" :services="services" />
   </div>
 </template>
 
@@ -12,6 +12,9 @@ export default {
   props: {
     timetable: {
       type: Object
+    },
+    services: {
+      type: Array
     }
   },
 };

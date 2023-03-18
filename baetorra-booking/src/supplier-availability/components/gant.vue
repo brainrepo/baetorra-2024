@@ -1,8 +1,7 @@
 <script lang="ts">
 import { defineComponent, toRefs, watch, ref } from "vue";
 import DayCell from "./day-cell.vue";
-import PriceCell from "./price-cell.vue";
-import SellerCell from "./seller-cell.vue";
+import AvailabilityCell from "./availabilty-cell.vue";
 import VariantCell from "./variant-cell.vue";
 import { numDays, addDay, formatDate } from "../utils/utils";
 
@@ -10,8 +9,7 @@ export default defineComponent({
   name: "v-timeline",
   components: {
     "v-daycell": DayCell,
-    "v-pricecell": PriceCell,
-    "v-sellercell": SellerCell,
+    "v-availabilitycell": AvailabilityCell,
     "v-variantcell": VariantCell,
   },
   props: {
@@ -24,6 +22,10 @@ export default defineComponent({
     },
     maxDate: {
       type: String,
+      required: true,
+    },
+    services: {
+      type: Array,
       required: true,
     },
   },
@@ -46,7 +48,7 @@ export default defineComponent({
       }
     );
 
-    return { calendar, timetable, formatDate };
+    return { calendar, timetable, formatDate, console };
   },
 });
 </script>
@@ -59,7 +61,7 @@ export default defineComponent({
         <v-daycell v-for="(day, index) in calendar" :date="day" />
       </tr>
 
-      <tbody v-for="(service, key) in timetable.timetable">
+      <tbody v-for="(service, key) in services">
         <tr>
           <td
             :colspan="calendar.length + 1"
@@ -73,28 +75,36 @@ export default defineComponent({
           </td>
         </tr>
 
+        <tr v-for="(resource, _, index) in service.resources">
+          <v-variantcell :name="resource.name"></v-variantcell>
+          <td v-for="day in calendar">
+            <div class="cell">
+              <template v-for="shift in service.shifts">
+          
+    
+                <v-availabilitycell
+                  :scheleton="{
+                    service: service.id,
+                    resource: resource.id,
+                    shift: shift.id,
+                    date: formatDate(day)
+                  }"
+                  :amount="
+                    timetable.timetable?.[service.id]?.resource[resource.id]
+                      ?.dates?.[formatDate(day)]?.[shift.id]?.amount ?? 0
+                  "
+                  :id="
+                    timetable.timetable?.[service.id]?.resource[resource.id]
+                      ?.dates?.[formatDate(day)]?.[shift.id]?.id
+                  "
+                  :shift="shift"
+            />
 
-
-          <tr v-for="(resource, _, index) in service.resource">
-            <v-variantcell
-              :name="resource.name"
-            ></v-variantcell>
-            <td
-              v-for="day in calendar"
-              :class="{
-                borderbottom: index !== Object.keys(seller.variants).length - 1
-              }"
-            >
-              <div class="cell" v-if="variant?.prices?.[formatDate(day)]">
-                <v-pricecell
-                  :price="price"
-                  v-for="price in variant.prices[formatDate(day)]"
-                >
-                </v-pricecell>
-              </div>
-            </td>
-          </tr>
-     
+            
+            </template>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

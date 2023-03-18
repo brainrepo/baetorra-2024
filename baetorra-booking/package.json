@@ -14,7 +14,7 @@
         "name": "supplier-prices",
         "source": "src/supplier-prices/index.ts"
       },
-       {
+      {
         "type": "layout",
         "name": "supplier-availability",
         "source": "src/supplier-availability/index.ts"
@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "date-fns": "^2.29.3",
-    "frappe-gantt": "^0.6.1"
+    "frappe-gantt": "^0.6.1",
+    "lodash.debounce": "^4.0.8"
   }
 }
