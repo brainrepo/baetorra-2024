@@ -82,24 +82,27 @@ export default defineComponent({
           </tr>
 
           <tr v-for="(variant, _, index) in seller.variants">
-            <v-variantcell :name="variant.name" :class="
-                index === Object.keys(seller.variants).length - 1
-                  ? ''
-                  : 'borderbottom'
-              "></v-variantcell>
-            <td
-              v-for="day in calendar"
+            <v-variantcell
+              :name="variant.name"
               :class="
                 index === Object.keys(seller.variants).length - 1
                   ? ''
                   : 'borderbottom'
               "
+            ></v-variantcell>
+            <td
+              v-for="day in calendar"
+              :class="{
+                borderbottom: index !== Object.keys(seller.variants).length - 1
+              }"
             >
-              <v-pricecell
-                v-if="variant?.prices?.[formatDate(day)]"
-                :price="variant.prices[formatDate(day)]"
-              >
-              </v-pricecell>
+              <div class="cell" v-if="variant?.prices?.[formatDate(day)]">
+                <v-pricecell
+                  :price="price"
+                  v-for="price in variant.prices[formatDate(day)]"
+                >
+                </v-pricecell>
+              </div>
             </td>
           </tr>
         </template>
@@ -125,11 +128,15 @@ export default defineComponent({
     }
 
     td {
-      min-width: 80px;
-      max-width: 100px;
+      // min-width: 80px;
+      // max-width: 100px;
     }
     td.borderbottom {
       border-bottom: 1px dashed var(--foreground-subdued);
+    }
+    .cell {
+      display: flex;
+      flex-direction: row;
     }
   }
 }

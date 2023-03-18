@@ -5,6 +5,9 @@ type Items = Array<{
   to: string;
   id: string;
   name: string;
+  shift: {
+    name: string;
+  };
   sellers: {
     directus_users_id: {
       id: string;
@@ -40,7 +43,7 @@ type TimetableSeller = {
 type TimetableVariant = {
   id: string;
   name: string;
-  prices: Record<string, TimetablePrice>;
+  prices: Record<string, TimetablePrice[]>;
 };
 
 type TimetablePrice = {
@@ -99,18 +102,25 @@ export function generateTimetable(items: Items) {
       for (let i = 0; i <= dateDiff; i++) {
         const day = addDay(item.from, i);
 
+        if (
+          timetable[item.service.id].sellers[seller.directus_users_id.id]
+            .variants[item.variant.id].prices?.[formatDate(day)] === undefined
+        ) {
+          timetable[item.service.id].sellers[
+            seller.directus_users_id.id
+          ].variants[item.variant.id].prices[formatDate(day)] = [];
+        }
+
         timetable[item.service.id].sellers[
           seller.directus_users_id.id
-        ].variants[item.variant.id].prices = {
-          ...timetable[item.service.id].sellers[seller.directus_users_id.id]
-            .variants[item.variant.id].prices,
-          [formatDate(day)]: {
-            id: item.id,
-            price: item.price,
-            fee: item.fee,
-            date: day,
-          },
-        };
+        ].variants[item.variant.id].prices[formatDate(day)].push({
+          id: item.id,
+          price: item.price,
+          fee: item.fee,
+          date: day,
+          shiftName: item.shift.name,
+          color: item.color,
+        });
       }
     }
   }
