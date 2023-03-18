@@ -52,8 +52,6 @@ export default defineComponent({
   line-height: 12px;
   border-radius: 4px;
   overflow: hidden;
-  //min-width: 80px;
-  //max-width: 80px;
   .big {
     font-size: 26px;
     line-height: 26px;

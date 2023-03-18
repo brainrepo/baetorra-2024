@@ -121,16 +121,11 @@ export default defineComponent({
     td:first-child {
       position: sticky;
       left: 0;
-      //background-color: var(--background-normal);
       font-size: 12px;
       padding: 6px;
       border-radius: 4px;
     }
 
-    td {
-      // min-width: 80px;
-      // max-width: 100px;
-    }
     td.borderbottom {
       border-bottom: 1px dashed var(--foreground-subdued);
     }
