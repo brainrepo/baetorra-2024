@@ -1,4 +1,10 @@
-import { addDays, differenceInCalendarDays, parse, set } from "date-fns";
+import {
+  addDays,
+  differenceInCalendarDays,
+  parse,
+  set,
+  format,
+} from "date-fns";
 import { minBy, maxBy } from "lodash";
 
 const DATE_FORMAT = "yyyy-MM-dd";
@@ -35,3 +41,7 @@ export function getDaysBetween(from: string, to: string) {
     .fill("-")
     .map((_, i) => addDays(parseDateStart(from), i));
 }
+
+export const formatDate = (date: Date) => {
+  return format(date, DATE_FORMAT);
+};
