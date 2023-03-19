@@ -1,9 +1,8 @@
 <script lang="ts">
-import { defineComponent, ref, watch, toRefs } from "vue";
-import { format, isWeekend as isWeekendCheck } from "date-fns";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "v-variantcell",
+  name: "ResourceCell",
   props: {
     name: { type: String, required: true },
   },
@@ -11,20 +10,22 @@ export default defineComponent({
 </script>
 
 <template>
-  <td class="variantcell">
+  <td class="resourcecell">
     <div>{{ name }}</div>
   </td>
 </template>
 
 <style lang="scss">
-.variantcell {
-  background-color: var(--background-page);
+.resourcecell {
+  background-color: var(--background-normal);
   color: var(--foreground-normal);
-  font-size: 8px;
+  font-size: 10px;
+  position: sticky;
+  left: 42px;
   padding: 12px;
   line-height: 12px;
   border-radius: 4px;
-  text-transform: capitalize;
+  text-transform: uppercase;
   z-index: 10;
 }
 </style>

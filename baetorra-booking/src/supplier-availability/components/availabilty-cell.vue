@@ -14,81 +14,90 @@ export default defineComponent({
   setup: (props) => {
     const api = useApi();
     const loading = ref(false);
+    const isFocus = ref(false);
     const { id, amount, scheleton } = toRefs(props);
 
-    watch(
-      amount,
-      debounce(() => {
-        loading.value = true;
-        if (id.value) {
-          api
-            .patch(`items/availability/${id.value}`, {
-              amount: amount.value,
-            })
-            .finally(() => (loading.value = false));
-        } else {
-          api
-            .post(`items/availability`, {
-              amount: amount.value,
-              ...scheleton.value,
-            })
-            .then(({ data }) => {
-              id.value = data.data.id;
-            })
-            .finally(() => (loading.value = false));
-        }
-      }, 400)
-    );
+    const setFocus = (focus: boolean) => {
+      isFocus.value = focus
+    }
 
-    return { loading, amount, id };
+    const setAvailability = () => {
+      loading.value = true;
+      if (id.value) {
+        api
+          .patch(`items/availability/${id.value}`, {
+            amount: amount.value,
+          })
+          .finally(() => (loading.value = false));
+      } else {
+        api
+          .post(`items/availability`, {
+            amount: amount.value,
+            ...scheleton.value,
+          })
+          .then(({ data }) => {
+            id.value = data.data.id;
+          })
+          .finally(() => (loading.value = false));
+      }
+    };
+    watch(amount, debounce(setAvailability, 400) as () => void);
+
+    return { loading, amount, id, setFocus, isFocus };
   },
 });
 </script>
 
 <template>
-  <div :class="{ availability: true, 'not-created': !id }">
+  <div :class="{ availability: true, 'not-created': !id, focus: isFocus  }">
     <div class="shift">
       {{ shift.name }}
     </div>
-    <div class="availability-info">
-      <span class="big"> 0 / </span>
-      <input v-if="!loading"
-        small
-        type="number"
-        :style="{ width: '30px' }"
-        v-model="amount"
-      /><v-icon v-if="loading" name="cached" small :filled="false" class="rotating"></v-icon>
-    </div>
+    <label v-if="!loading">
+      <span class="big" v-if="id">0/</span>
+      <span
+        ><input type="number" :style="{ width: '30px' }" v-model="amount" @focusin="setFocus(true)" @focusout="setFocus(false)"
+      /></span>
+    </label>
+    <v-icon
+      v-if="loading"
+      name="cached"
+      small
+      :filled="false"
+      class="rotating"
+    ></v-icon>
   </div>
 </template>
 
 <style lang="scss" scoped="true">
 .availability {
-  display: block;
-  background-color: var(--background-normal);
+  width: 100%;
   color: var(--foreground-normal);
   font-size: 12px;
   line-height: 12px;
-  border-radius: 4px;
   overflow: hidden;
   min-width: 80px;
-  max-width: 80px;
   text-align: center;
   flex-shrink: 0;
-  &:not(:last-child) {
-    margin-right: 4px;
+  border-radius: 4px;
+  border: 2px solid var(--border-normal);
+  margin-bottom:3px;
+  &.focus{
+    border: 2px solid var(--primary);
   }
   &.not-created {
     opacity: 0.6;
   }
-  .availability-info {
-    padding: 4px;
+  label {
+    text-align: center;
+    justify-items: end;
+    align-items: center;
+    width: 100%;
     .big {
       font-size: 14px;
       line-height: 14px;
-      font-weight: bold;
       border-radius: 4px;
-      font-family: var(--family-sans-serif);
+      font-family: var(--family-monospace);
     }
     .bottom {
       font-size: 9px;
@@ -101,7 +110,16 @@ export default defineComponent({
     color: var(--foreground-inverted);
     font-size: 8px;
     text-transform: uppercase;
-    font-weight: 600;
+  }
+  input {
+    border: 0;
+    background-color: transparent;
+    font-size: 14px;
+    border-radius: 3px;
+    font-family: var(--family-monospace);
+  }
+  input:focus {
+    color: var(--primary);
   }
 }
 

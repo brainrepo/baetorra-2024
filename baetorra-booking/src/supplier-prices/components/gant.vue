@@ -110,7 +110,7 @@ export default defineComponent({
     </table>
   </div>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .timetable-table {
   margin: 30px;
   overflow-x: scroll;

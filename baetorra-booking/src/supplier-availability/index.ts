@@ -1,5 +1,4 @@
-import { reduce } from "lodash";
-import { computed, ref, toRefs, watch } from "vue";
+import { computed, ref, toRefs } from "vue";
 import LayoutComponent from "./layout.vue";
 import { defineLayout } from "@directus/shared/utils";
 import { useCollection, useItems } from "@directus/extensions-sdk";
@@ -15,12 +14,11 @@ export default defineLayout({
     sidebar: () => null,
     actions: () => null,
   },
-  setup(props, { emit }) {
+  setup(props) {
     const name = ref("supplier-price-timeline");
     const { collection, filter, search } = toRefs(props);
 
-    const { primaryKeyField, fields: fieldsInCollection } =
-      useCollection(collection);
+    const { primaryKeyField } = useCollection(collection);
 
     const queryFields = computed(() => {
       return [
@@ -63,24 +61,7 @@ export default defineLayout({
       search: search,
     });
 
-    const timetable = ref();
-
-    watch(
-      items,
-      (data) => {
-        console.log(data);
-        timetable.value = generateTimetable(data);
-        //timetable.value = data;
-        console.log("generate timetable", timetable.value);
-      },
-      {
-        immediate: true,
-      }
-    );
-
-    watch(services, (data) => console.log(data), {
-      immediate: true,
-    });
+    const timetable = computed(() => generateTimetable(items.value));
 
     return { name, collection, filter, search, items, timetable, services };
   },

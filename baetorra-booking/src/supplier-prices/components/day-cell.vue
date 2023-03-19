@@ -38,7 +38,7 @@ export default defineComponent({
   </th>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .daycell.weekend {
   background-color: var(--background-subdued);
   color: var(--foreground-subdued);

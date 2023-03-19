@@ -1,14 +1,12 @@
 <template>
-  <div>
-    <v-gantt  :timetable="timetable" :services="services" />
-  </div>
+    <v-availability-timeline  :timetable="timetable" :services="services" />
 </template>
 
 <script>
-import Gantt from "./components/gant.vue";
+import Timeline from "./components/timeline.vue";
 export default {
   inheritAttrs: false,
-  components: { "v-gantt": Gantt },
+  components: { "v-availability-timeline": Timeline },
   props: {
     timetable: {
       type: Object
