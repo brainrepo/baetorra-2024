@@ -15,3 +15,10 @@ export type Item = {
   };
   amount: number;
 };
+
+export type Locker = {
+  amount: number;
+  availability: string;
+  service: string;
+  id: string;
+};
