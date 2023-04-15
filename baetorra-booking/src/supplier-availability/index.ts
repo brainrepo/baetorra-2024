@@ -69,25 +69,6 @@ export default defineLayout({
       .then(({ data }) => (lockers.value = data.data))
       .catch(console.error);
 
-    // get lockers
-    // const { items: lockers } = useItems(ref("resource_locker"), {
-    //   sort: computed(() => ["id"]),
-    //   page: ref(1),
-    //   limit: ref(100),
-    //   fields: [
-    //     "id",
-    //     "name",
-    //     "resources.id",
-    //     "resources.name",
-    //     "shifts.id",
-    //     "shifts.name",
-    //   ],
-    //   filter: {},
-    //   search: "",
-    // });
-
-    //console.log(lockers);
-
     const timetable = computed(() =>
       generateTimetable(items.value, lockers.value)
     );

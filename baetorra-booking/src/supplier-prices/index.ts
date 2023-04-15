@@ -49,7 +49,7 @@ export default defineLayout({
     const { items } = useItems(collection, {
       sort: computed(() => [primaryKeyField.value?.field || ""]),
       page: ref(1),
-      limit: ref(10000),
+      limit: ref(10000000),
       fields: queryFields,
       filter,
       search: search,
