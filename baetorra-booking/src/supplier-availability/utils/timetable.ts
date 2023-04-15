@@ -1,8 +1,8 @@
 import { extractMinMaxDate } from "../../shared/date";
-import { Item } from "../types";
+import { Item, Locker } from "../types";
 import { set } from "lodash";
 
-export function generateTimetable(items: Item[]) {
+export function generateTimetable(items: Item[], lockers: Locker[]) {
   if (items === undefined || items.length === 0) return;
 
   const [min, max] = extractMinMaxDate<Item>(items, "date");
@@ -13,7 +13,11 @@ export function generateTimetable(items: Item[]) {
     set(
       timetable,
       `${item.service.id}.resource.${item.resource.id}.dates.${item.date}.${item.shift.id}`,
-      { id: item.id, amount: item.amount }
+      {
+        id: item.id,
+        amount: item.amount,
+        lockers: lockers?.filter((l) => l.availability === item.id),
+      }
     );
   });
 

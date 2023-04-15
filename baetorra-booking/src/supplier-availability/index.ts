@@ -1,7 +1,7 @@
 import { computed, ref, toRefs } from "vue";
 import LayoutComponent from "./layout.vue";
 import { defineLayout } from "@directus/shared/utils";
-import { useCollection, useItems } from "@directus/extensions-sdk";
+import { useApi, useCollection, useItems } from "@directus/extensions-sdk";
 import { generateTimetable } from "./utils/timetable";
 
 export default defineLayout({
@@ -17,6 +17,7 @@ export default defineLayout({
   setup(props) {
     const name = ref("supplier-price-timeline");
     const { collection, filter, search } = toRefs(props);
+    const lockers = ref({});
 
     const { primaryKeyField } = useCollection(collection);
 
@@ -61,8 +62,25 @@ export default defineLayout({
       search: search,
     });
 
-    const timetable = computed(() => generateTimetable(items.value));
+    const api = useApi();
 
-    return { name, collection, filter, search, items, timetable, services };
+    api
+      .get("items/resource_locker", {})
+      .then(({ data }) => (lockers.value = data.data))
+      .catch(console.error);
+
+    const timetable = computed(() =>
+      generateTimetable(items.value, lockers.value)
+    );
+
+    return {
+      name,
+      collection,
+      filter,
+      search,
+      items,
+      timetable,
+      services,
+    };
   },
 });

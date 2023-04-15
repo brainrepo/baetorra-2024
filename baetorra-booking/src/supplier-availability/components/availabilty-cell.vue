@@ -1,7 +1,8 @@
 <script lang="ts">
-import { defineComponent, ref, watch, toRefs } from "vue";
+import { defineComponent, ref, watch, toRefs, computed } from "vue";
 import { useApi, useStores } from "@directus/extensions-sdk";
 import debounce from "lodash.debounce";
+import {Locker} from "../types"
 
 export default defineComponent({
   name: "v-availabilitycell",
@@ -10,16 +11,40 @@ export default defineComponent({
     amount: { type: Number, required: true },
     shift: { type: Object, required: true },
     scheleton: { type: Object, required: true },
+    lockers: { type: Array, required: false },
   },
   setup: (props) => {
     const api = useApi();
     const loading = ref(false);
     const isFocus = ref(false);
-    const { id, amount, scheleton } = toRefs(props);
+    const { id, amount, scheleton, lockers } = toRefs(props);
+    const reserved = computed(() => 
+      lockers.value?.reduce((acc: number, locker:Locker) => acc + locker.amount, 0) as Number ?? 0 
+    )
+
+    const reservedTemp = computed(() => {
+      const temp = (reserved.value / amount.value)
+
+      if(temp < .5) {
+        return "green"
+      }
+
+      if(temp < 1) {
+        return "orange"
+      }
+
+      if(temp >= 1) {
+        return "red"
+      }
+
+      return ""
+    })
+
+
 
     const setFocus = (focus: boolean) => {
-      isFocus.value = focus
-    }
+      isFocus.value = focus;
+    };
 
     const setAvailability = () => {
       loading.value = true;
@@ -43,20 +68,27 @@ export default defineComponent({
     };
     watch(amount, debounce(setAvailability, 400) as () => void);
 
-    return { loading, amount, id, setFocus, isFocus };
+    return { loading, amount, id, setFocus, isFocus, reserved, reservedTemp };
   },
 });
 </script>
 
 <template>
-  <div :class="{ availability: true, 'not-created': !id, focus: isFocus  }">
-    <div class="shift">
+  <div :class="{ availability: true, 'not-created': !id, focus: isFocus }">
+    <div :class="`shift ${reservedTemp}`">
       {{ shift.name }}
     </div>
     <label v-if="!loading">
-      <span class="big" v-if="id">0/</span>
+      <span class="big" v-if="id" :data-id="JSON.stringify(id)"
+        >{{ reserved }}/</span
+      >
       <span
-        ><input type="number" :style="{ width: '30px' }" v-model="amount" @focusin="setFocus(true)" @focusout="setFocus(false)"
+        ><input
+          type="number"
+          :style="{ width: '30px' }"
+          v-model="amount"
+          @focusin="setFocus(true)"
+          @focusout="setFocus(false)"
       /></span>
     </label>
     <v-icon
@@ -81,8 +113,8 @@ export default defineComponent({
   flex-shrink: 0;
   border-radius: 4px;
   border: 2px solid var(--border-normal);
-  margin-bottom:3px;
-  &.focus{
+  margin-bottom: 3px;
+  &.focus {
     border: 2px solid var(--primary);
   }
   &.not-created {
@@ -110,6 +142,15 @@ export default defineComponent({
     color: var(--foreground-inverted);
     font-size: 8px;
     text-transform: uppercase;
+    &.red{
+      background-color: var(--red);
+    }
+    &.green{
+      background-color: var(--green);
+    }
+    &.orange{
+      background-color: var(--orange);
+    }
   }
   input {
     border: 0;

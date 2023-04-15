@@ -92,6 +92,8 @@ export default defineComponent({
                     timetable.timetable?.[service.id]?.resource[resource.id]
                       ?.dates?.[formatDate(day)]?.[shift.id]?.id
                   "
+                  :lockers="timetable.timetable?.[service.id]?.resource[resource.id]
+                      ?.dates?.[formatDate(day)]?.[shift.id]?.lockers"
                   :shift="shift"
                 />
               </template>
