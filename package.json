@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec npx directus start"
+    "dev": "nodemon --exec npx directus start",
+    "db:bootstrap": "npx directus database install && npx directus database migrate:latest && npx directus schema apply --yes ./snapshot.yaml",
+    "db:snapshot:apply": "npx directus schema apply ./snapshot.yaml",
+    "db:snapshot:create": "npx directus schema snapshot ./snapshot.yaml"
   },
   "author": "",
   "license": "ISC",
