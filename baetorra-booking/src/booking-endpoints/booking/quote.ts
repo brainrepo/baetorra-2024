@@ -13,6 +13,9 @@ export async function getServiceFromServiceId(
   ItemsService: any, //directus doesn't export the type
   schema: any
 ): Promise<Service | undefined> {
+  if (!serviceId || serviceId === "undefined") {
+    return undefined;
+  }
   const serviceService = new ItemsService("service", {
     schema,
     accountability: { admin: true, app: true },
