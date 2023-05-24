@@ -17,12 +17,16 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list>
+  <v-list dense="false">
     <v-list-item v-for="(item, index) in items"  clickable :to="`/booking-module/quote/${item.id}`">
-      <v-list-item-icon>
-        <v-icon name="box" />
-      </v-list-item-icon>
-      {{ item?.name }}
+      <v-image :src="'/assets/'+item.cover?.id+'?fit=cover&width=40&height=40&quality=80'" />
+
+      <span class="spacing-l">{{ item?.name }}</span>
     </v-list-item>
   </v-list>
 </template>
+<style scoped>
+.spacing-l{
+  margin-left:3px;
+}
+</style>
