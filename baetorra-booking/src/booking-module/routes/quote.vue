@@ -104,7 +104,10 @@ export default defineComponent({
     );
     watch(
       () => route.params.serviceId,
-      async (newId) => {
+      (newId) => {
+        if(typeof newId === 'undefined') {
+          return
+        }
         if(Array.isArray(newId)) {
           newId = newId[0]
         }
@@ -113,9 +116,8 @@ export default defineComponent({
     );
 
     watch(request, () => {
-      console.log("request change")
       if(service.value && request.value) {
-        getQuote(service.value.id, request.value).then(() => console.log("getted quote"))
+        getQuote(service.value.id, request.value)
       }
     }, {deep: true})
 

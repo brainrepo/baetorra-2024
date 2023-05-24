@@ -13,6 +13,9 @@ export async function getServiceFromServiceId(
   ItemsService: any, //directus doesn't export the type
   schema: any
 ): Promise<Service | undefined> {
+  if (!serviceId || serviceId === "undefined") {
+    return undefined;
+  }
   const serviceService = new ItemsService("service", {
     schema,
     accountability: { admin: true, app: true },
@@ -210,14 +213,6 @@ export const dateOverlap = (
   from2: string,
   to2: string
 ): boolean => {
-  console.log(
-    { start: parseDateStart(from1), end: parseDateEnd(to1) },
-    { start: parseDateStart(from2), end: parseDateEnd(to2) },
-    getOverlappingDaysInIntervals(
-      { start: parseDateStart(from1), end: parseDateEnd(to1) },
-      { start: parseDateStart(from2), end: parseDateEnd(to2) }
-    ) > 0
-  );
   return (
     getOverlappingDaysInIntervals(
       { start: parseDateStart(from1), end: parseDateEnd(to1) },

@@ -3,6 +3,7 @@ import { getUserId } from "../../shared/endpoints/user";
 export default (ItemsService) => async (req, res) => {
   const serviceId = req.params?.serviceId;
   const userId = getUserId(req) ?? null;
+
   const serviceService = new ItemsService("service", {
     schema: req.schema,
     accountability: { admin: true, app: true },
