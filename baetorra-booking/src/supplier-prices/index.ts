@@ -61,7 +61,6 @@ export default defineLayout({
       items,
       (data) => {
         timetable.value = generateTimetable(data);
-        console.log("generate timetable", timetable.value);
       },
       {
         immediate: true,

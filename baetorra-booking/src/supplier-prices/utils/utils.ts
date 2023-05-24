@@ -44,14 +44,6 @@ export const dateOverlap = (
   from2: string,
   to2: string
 ): boolean => {
-  console.log(
-    { start: parseDateStart(from1), end: parseDateEnd(to1) },
-    { start: parseDateStart(from2), end: parseDateEnd(to2) },
-    getOverlappingDaysInIntervals(
-      { start: parseDateStart(from1), end: parseDateEnd(to1) },
-      { start: parseDateStart(from2), end: parseDateEnd(to2) }
-    ) > 0
-  );
   return (
     getOverlappingDaysInIntervals(
       { start: parseDateStart(from1), end: parseDateEnd(to1) },

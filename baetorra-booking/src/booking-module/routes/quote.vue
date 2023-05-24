@@ -98,7 +98,6 @@ export default defineComponent({
     watch(
       service,
       (s) => {
-        console.log("page change", s)
         if(!s) return 
         request.value = initializeRequestByService(s, currentUser.id);
       }
@@ -106,7 +105,6 @@ export default defineComponent({
     watch(
       () => route.params.serviceId,
       (newId) => {
-        console.log("id change", newId)
         if(typeof newId === 'undefined') {
           return
         }
@@ -118,10 +116,8 @@ export default defineComponent({
     );
 
     watch(request, () => {
-      console.log("request change")
-       console.log("id change x", service.value)
       if(service.value && request.value) {
-        getQuote(service.value.id, request.value).then(() => console.log("getted quote"))
+        getQuote(service.value.id, request.value)
       }
     }, {deep: true})
 
