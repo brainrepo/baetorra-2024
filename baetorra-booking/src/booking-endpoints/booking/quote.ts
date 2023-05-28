@@ -6,6 +6,132 @@ import {
   set,
   differenceInDays,
 } from "date-fns";
+import _ from "lodash";
+
+export default (ItemsService) => async (req, res) => {
+  const serviceId = req.params?.serviceId;
+  const userId = getUserId(req) ?? null;
+  const request: Request = req.body;
+  const service = await getServiceFromServiceId(
+    serviceId,
+    userId,
+    ItemsService,
+    req.schema
+  );
+
+  if (!validateRequest(request, service, userId)) {
+    res.send({ error: "request not valid" });
+    return;
+  }
+
+  let lockers: Record<string, number> = {};
+  let prices: Record<
+    string,
+    | {
+        type: "price";
+        amount: number;
+        value: number;
+        fees: number;
+        total: number;
+      }
+    | { type: "error"; message: string }
+  > = {};
+
+  const requestedVariant = removeZeroValProps(request.variants);
+
+  for (const vk in requestedVariant) {
+    const p = await getPricesByVariantSellerShift(
+      vk,
+      userId,
+      request.shift,
+      request.date,
+      ItemsService,
+      req.schema
+    );
+
+    const price = p?.[0];
+    if (!price) {
+      prices[vk] = { type: "error", message: "no price available" };
+    } else {
+      prices[vk] = {
+        amount: requestedVariant[vk]!,
+        type: "price",
+        value: price.price,
+        fees: price.fee,
+        total: (price.price + price.fee) * requestedVariant[vk]!,
+      };
+    }
+
+    const variantLockers = await getResourcesLockerFromVariantRequest(
+      vk,
+      requestedVariant[vk]!,
+      ItemsService,
+      req.schema
+    );
+
+    Object.keys(variantLockers).forEach((key) => {
+      lockers[key] = (lockers?.[key] ?? 0) + variantLockers[key];
+    });
+  }
+
+  // populate lockers with old reservations lockers
+  for (const lockerK in lockers) {
+    await warmupLockers(
+      lockers,
+      lockerK,
+      request.shift,
+      request.date,
+      ItemsService,
+      req.schema
+    );
+  }
+
+  console.log("lockers----", lockers);
+
+  const availabilities = await getAvailabilityFromResource(
+    Object.keys(lockers),
+    request.shift,
+    request.date,
+    ItemsService,
+    req.schema
+  );
+
+  console.log("availabilities", availabilities);
+
+  for (const lockerK in lockers) {
+    if ((availabilities?.[lockerK] ?? 0) - lockers[lockerK]! < 0) {
+      res.send({ prices, error: { code: "NO AVAILABILITY" } });
+      return;
+    }
+  }
+
+  res.send({ prices, availability: { code: "OK" } });
+};
+
+async function getAvailabilityFromResource(
+  resourceIds: string[],
+  shiftId: string,
+  date: string,
+  ItemsService: any,
+  schema: any
+) {
+  const availabilityService = new ItemsService("availability", {
+    schema,
+    accountability: { admin: true, app: true },
+  });
+
+  const availabilities = await availabilityService.readByQuery({
+    sort: ["id"],
+    fields: ["resource", "amount"],
+    filter: {
+      resource: { _in: resourceIds },
+      date: { _eq: date },
+      shift: { _eq: shiftId },
+    },
+  });
+
+  return _.chain(availabilities).keyBy("resource").mapValues("amount").value();
+}
 
 export async function getServiceFromServiceId(
   serviceId: string,
@@ -72,65 +198,67 @@ export async function getPricesByVariantSellerShift(
   });
 }
 
-export default (ItemsService) => async (req, res) => {
-  const serviceId = req.params?.serviceId;
-  const userId = getUserId(req) ?? null;
-  const request: Request = req.body;
-  const service = await getServiceFromServiceId(
-    serviceId,
-    userId,
-    ItemsService,
-    req.schema
-  );
+async function getResourcesLockerFromVariantRequest(
+  variantId: string,
+  requestedAmount: number,
+  ItemsService: any,
+  schema: any
+) {
+  const variantResourceService = new ItemsService("variant_resource", {
+    schema,
+    accountability: { admin: true, app: true },
+  });
 
-  if (!validateRequest(request, service, userId)) {
-    res.send({ error: "request not valid" });
-    return;
-  }
+  const resourcesWithAmounts = await variantResourceService.readByQuery({
+    sort: ["id"],
+    fields: ["resource.id", "amount"],
+    filter: {
+      variant: { id: { _eq: variantId } },
+    },
+  });
 
-  let lockers;
-  let availabilities;
-  let prices = {};
-  let errors;
+  const lockers = resourcesWithAmounts.reduce((acc: any, e: any) => {
+    acc[e.resource.id] = (acc[e.resource.id] ?? 0) + e.amount * requestedAmount;
+    return acc;
+  }, {});
 
-  // Get prices
+  return lockers;
+}
 
-  const requestedVariant = removeZeroValProps(request.variants);
+// Load the lockers from already active reservations
+async function warmupLockers(
+  lockers: Record<string, number> = {},
+  resourceId: string,
+  shiftId: string,
+  date: string,
+  ItemsService: any,
+  schema: any
+) {
+  const LockersService = new ItemsService("resource_locker", {
+    schema,
+    accountability: { admin: true, app: true },
+  });
 
-  for (const vk in requestedVariant) {
-    const p = await getPricesByVariantSellerShift(
-      vk,
-      userId,
-      request.shift,
-      request.date,
-      ItemsService,
-      req.schema
-    );
+  const bookedLockers = await LockersService.readByQuery({
+    sort: ["id"],
+    fields: ["amount", "resource"],
+    filter: {
+      resource: { id: { _eq: resourceId } },
+      date: { _eq: date },
+      shift: { _eq: shiftId },
+      status: { _eq: true },
+    },
+  });
 
-    const price = p?.[0];
-    if (!price) {
-      prices[vk] = { type: "error", message: "no price available" };
-    } else {
-      prices[vk] = {
-        amount: requestedVariant[vk],
-        type: "price",
-        value: price.price,
-        fees: price.fee,
-        total: (price.price + price.fee) * requestedVariant[vk],
-      };
+  bookedLockers.forEach(
+    (bookedLocker: { resource: string; amount: number }) => {
+      console.log("update lockers ", lockers[bookedLocker.resource]);
+      lockers[bookedLocker.resource] =
+        (lockers?.[bookedLocker.resource] ?? 0) + bookedLocker.amount;
+      console.log("update lockers fine", lockers[bookedLocker.resource]);
     }
-  }
-
-  res.send({ prices });
-
-  // get resources linked to the variant
-  // get availabilities for the current resources/shift/date price[variant, resource, shift] = (value, fee)
-
-  // for every resource linked
-  // if (availability - lockers[resource, shift, date] - othersreservations) - requested_resource
-  // >= 0 return true, lockers[resource, shift].push(requested_resource), availabilities[variant, resource, shift] = true
-  // < 0  return false, error[variant, resource, shift] = no availability,availabilities[variant, resource, shift] = true
-};
+  );
+}
 
 export function validateRequest(
   request: Request,
@@ -180,6 +308,7 @@ function requestedDateIsGreaterEqualsToday(request: Request) {
 function areSetsEqual<K>(a: Set<K>, b: Set<K>) {
   return a.size === b.size && [...a].every((value) => b.has(value));
 }
+
 export const removeZeroValProps = (
   obj: Record<string, number>
 ): Record<string, number> => {
@@ -191,8 +320,10 @@ export const removeZeroValProps = (
   }, {});
 };
 
+// Date utils
 export const parseDate = (date: string) =>
   parse(date, "yyyy-MM-dd", new Date());
+
 export const parseDateStart = (date: string) =>
   set(parse(date, "yyyy-MM-dd", new Date()), {
     hours: 0,
@@ -200,6 +331,7 @@ export const parseDateStart = (date: string) =>
     seconds: 0,
     milliseconds: 0,
   });
+
 export const parseDateEnd = (date: string) =>
   set(parse(date, "yyyy-MM-dd", new Date()), {
     hours: 23,
@@ -207,6 +339,7 @@ export const parseDateEnd = (date: string) =>
     seconds: 59,
     milliseconds: 999,
   });
+
 export const dateOverlap = (
   from1: string,
   to1: string,
