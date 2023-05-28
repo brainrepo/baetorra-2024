@@ -29,3 +29,12 @@ export interface Request {
   variants: Record<string, number>;
   seller: string;
 }
+
+export interface Price {
+  color: string;
+  fee: number;
+  from: string;
+  to: string;
+  name: string;
+  price: number;
+}
