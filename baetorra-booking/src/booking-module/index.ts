@@ -5,7 +5,7 @@ import QuoteComponent from "./routes/quote.vue";
 export default defineModule({
   id: "booking-module",
   name: "Booking",
-  icon: "box",
+  icon: "confirmation_number",
   routes: [
     {
       path: "",
