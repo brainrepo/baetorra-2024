@@ -6,6 +6,7 @@ import {
   set,
   differenceInDays,
 } from "date-fns";
+import _ from "lodash";
 
 export default (ItemsService) => async (req, res) => {
   const serviceId = req.params?.serviceId;
@@ -87,10 +88,50 @@ export default (ItemsService) => async (req, res) => {
 
   console.log("lockers----", lockers);
 
-  // To do load availability per each resource and apply subtraction
+  const availabilities = await getAvailabilityFromResource(
+    Object.keys(lockers),
+    request.shift,
+    request.date,
+    ItemsService,
+    req.schema
+  );
 
-  res.send({ prices });
+  console.log("availabilities", availabilities);
+
+  for (const lockerK in lockers) {
+    if ((availabilities?.[lockerK] ?? 0) - lockers[lockerK]! < 0) {
+      res.send({ prices, error: { code: "NO AVAILABILITY" } });
+      return;
+    }
+  }
+
+  res.send({ prices, availability: { code: "OK" } });
 };
+
+async function getAvailabilityFromResource(
+  resourceIds: string[],
+  shiftId: string,
+  date: string,
+  ItemsService: any,
+  schema: any
+) {
+  const availabilityService = new ItemsService("availability", {
+    schema,
+    accountability: { admin: true, app: true },
+  });
+
+  const availabilities = await availabilityService.readByQuery({
+    sort: ["id"],
+    fields: ["resource", "amount"],
+    filter: {
+      resource: { _in: resourceIds },
+      date: { _eq: date },
+      shift: { _eq: shiftId },
+    },
+  });
+
+  return _.chain(availabilities).keyBy("resource").mapValues("amount").value();
+}
 
 export async function getServiceFromServiceId(
   serviceId: string,
@@ -208,8 +249,6 @@ async function warmupLockers(
       status: { _eq: true },
     },
   });
-
-  console.log("bookedLockers", bookedLockers, resourceId, shiftId, date);
 
   bookedLockers.forEach(
     (bookedLocker: { resource: string; amount: number }) => {
