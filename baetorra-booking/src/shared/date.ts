@@ -4,6 +4,8 @@ import {
   parse,
   set,
   format,
+  getOverlappingDaysInIntervals,
+  differenceInDays,
 } from "date-fns";
 import { minBy, maxBy } from "lodash";
 
@@ -44,4 +46,28 @@ export function getDaysBetween(from: string, to: string) {
 
 export const formatDate = (date: Date) => {
   return format(date, DATE_FORMAT);
+};
+
+export const dateOverlap = (
+  from1: string,
+  to1: string,
+  from2: string,
+  to2: string
+): boolean => {
+  return (
+    getOverlappingDaysInIntervals(
+      { start: parseDateStart(from1), end: parseDateEnd(to1) },
+      { start: parseDateStart(from2), end: parseDateEnd(to2) }
+    ) > 0
+  );
+};
+
+export const dateDiff = (date1: string, date2?: string) => {
+  if (!date2) {
+    date2 = format(new Date(), DATE_FORMAT);
+  }
+  return differenceInDays(
+    parse(date1, "yyyy-MM-dd", new Date()),
+    parse(date2, "yyyy-MM-dd", new Date())
+  );
 };

@@ -1,14 +1,14 @@
 import { defineEndpoint } from "@directus/extensions-sdk";
-import bookingServices from "./booking/services";
-import bookingService from "./booking/service";
-import bookingQuote from "./booking/quote";
+import getBookableServices from "./handlers/bookable-services";
+import getBookableService from "./handlers/bookable-service";
+import bookingQuote from "./handlers/quote";
 
-export default defineEndpoint((router, { services, emitter }) => {
+export default defineEndpoint(async (router, { services, emitter }) => {
   const { ItemsService } = services;
 
-  router.get("/services", bookingServices(ItemsService, emitter));
+  router.get("/services", getBookableServices(ItemsService, emitter));
 
-  router.get("/services/:serviceId", bookingService(ItemsService));
+  router.get("/services/:serviceId", getBookableService(ItemsService));
 
   router.post("/services/:serviceId/quote", bookingQuote(ItemsService));
 });

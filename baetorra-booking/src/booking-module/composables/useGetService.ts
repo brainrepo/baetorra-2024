@@ -1,10 +1,6 @@
 import { useApi } from "@directus/extensions-sdk";
-import {
-  Service,
-  initializeRequestByService,
-  isServiceValid,
-} from "../utils/index";
-import { ref, watch } from "vue";
+import { Service, isServiceValid } from "../utils/index";
+import { ref } from "vue";
 
 export function useGetService() {
   const api = useApi();
@@ -16,15 +12,15 @@ export function useGetService() {
     serviceLoading.value = true;
     serviceError.value = false;
     try {
-      const { data } = await api.get<Service[]>(
+      const { data } = await api.get<Service>(
         `/booking-endpoints/services/${id}`
       );
-      const s = data?.[0];
-      if (!s || !isServiceValid(s)) {
+
+      if (!data || !isServiceValid(data)) {
         serviceError.value = true;
         return;
       }
-      service.value = s;
+      service.value = data;
     } catch (e) {
       serviceError.value = true;
     } finally {
