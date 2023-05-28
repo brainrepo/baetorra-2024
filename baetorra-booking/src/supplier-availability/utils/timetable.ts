@@ -3,6 +3,7 @@ import { Item, Locker } from "../types";
 import { set } from "lodash";
 
 export function generateTimetable(items: Item[], lockers: Locker[]) {
+  console.log(lockers);
   if (items === undefined || items.length === 0) return;
 
   const [min, max] = extractMinMaxDate<Item>(items, "date");
@@ -20,6 +21,8 @@ export function generateTimetable(items: Item[], lockers: Locker[]) {
       }
     );
   });
+
+  console.log(timetable);
 
   return { timetable, minDate: min, maxDate: max };
 }

@@ -17,7 +17,7 @@ export default defineLayout({
   setup(props) {
     const name = ref("supplier-price-timeline");
     const { collection, filter, search } = toRefs(props);
-    const lockers = ref({});
+    const lockers = ref([]);
 
     const { primaryKeyField } = useCollection(collection);
 
@@ -70,7 +70,7 @@ export default defineLayout({
       .catch(console.error);
 
     const timetable = computed(() =>
-      generateTimetable(items.value, lockers.value)
+      generateTimetable(items.value, lockers?.value ?? [])
     );
 
     return {
