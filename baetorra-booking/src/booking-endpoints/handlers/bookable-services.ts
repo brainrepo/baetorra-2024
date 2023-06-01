@@ -7,7 +7,6 @@ export default (ItemsService: any, emitter: any) =>
     const userId = getUserId(req) ?? null;
 
     const service = await repository.getSellableServices(userId);
-    console.log("service", service);
 
     emitter.emitAction("baetorra-booking-get-services");
 

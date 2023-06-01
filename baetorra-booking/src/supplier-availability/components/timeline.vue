@@ -93,7 +93,7 @@ export default defineComponent({
                       ?.dates?.[formatDate(day)]?.[shift.id]?.id
                   "
                   :lockers="timetable.timetable?.[service.id]?.resource[resource.id]
-                      ?.dates?.[formatDate(day)]?.[shift.id]?.lockers"
+                      ?.dates?.[formatDate(day)]?.[shift.id]?.lockers.filter(l => l.status)"
                   :shift="shift"
                 />
               </template>

@@ -17,17 +17,26 @@ const Repository = (
     resourceIds: string[],
     shiftId: string,
     date: string
-  ): Promise<Record<string, number>>;
+  ): Promise<
+    {
+      id: string;
+      resource: string;
+      amount: number;
+      lockers: Array<{ amount: number; status: boolean }>;
+    }[]
+  >;
   getPricesByVariantSellerShift(
     variantId: string,
     sellerId: string,
     shiftId: string,
     date: string
   ): Promise<Price[]>;
-  getResourcesLockerFromVariantRequest(
-    variantId: string,
-    requestedAmount: number
-  ): Promise<Record<string, number>>;
+  getVariantResources(variantId: string): Promise<
+    {
+      resource: { id: string };
+      amount: number;
+    }[]
+  >;
 } => {
   const accountability = { admin: true, app: true };
 
@@ -79,20 +88,21 @@ const Repository = (
         accountability: { admin: true, app: true },
       });
 
-      const availabilities = await availabilityService.readByQuery({
+      return await availabilityService.readByQuery({
         sort: ["id"],
-        fields: ["resource", "amount"],
+        fields: [
+          "id",
+          "resource",
+          "amount",
+          "lockers.amount",
+          "lockers.status",
+        ],
         filter: {
           resource: { _in: resourceIds },
           date: { _eq: date },
           shift: { _eq: shiftId },
         },
       });
-
-      return _.chain(availabilities)
-        .keyBy("resource")
-        .mapValues("amount")
-        .value();
     },
 
     async getPricesByVariantSellerShift(variantId, sellerId, shiftId, date) {
@@ -114,37 +124,25 @@ const Repository = (
         },
       });
 
-      console.log(prices);
       //TODO: move it to the query
       return prices.filter((price: any) => {
         return dateOverlap(price.from, price.to, date, date);
       });
     },
 
-    async getResourcesLockerFromVariantRequest(
-      variantId: string,
-      requestedAmount: number
-    ) {
+    async getVariantResources(variantId: string) {
       const variantResourceService = new ItemsService("variant_resource", {
         schema,
         accountability: { admin: true, app: true },
       });
 
-      const resourcesWithAmounts = await variantResourceService.readByQuery({
+      return await variantResourceService.readByQuery({
         sort: ["id"],
         fields: ["resource.id", "amount"],
         filter: {
           variant: { id: { _eq: variantId } },
         },
       });
-
-      const lockers = resourcesWithAmounts.reduce((acc: any, e: any) => {
-        acc[e.resource.id] =
-          (acc[e.resource.id] ?? 0) + e.amount * requestedAmount;
-        return acc;
-      }, {});
-
-      return lockers;
     },
   };
 };

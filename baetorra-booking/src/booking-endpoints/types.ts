@@ -38,3 +38,18 @@ export interface Price {
   name: string;
   price: number;
 }
+
+// Responses
+
+export type VariantPrice =
+  | {
+      type: "price";
+      amount: number;
+      value: number;
+      fees: number;
+      total: number;
+    }
+  | {
+      type: "error";
+      message: string;
+    };
