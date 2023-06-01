@@ -6,13 +6,13 @@ export function useGetQuote() {
   const api = useApi();
   const quoteLoading = ref<boolean>(false);
   const quoteError = ref<boolean>(false);
-  const quote = ref<Service>();
+  const quote = ref();
 
   const getQuote = async (id: string, data: Request) => {
     quoteLoading.value = true;
     quoteError.value = false;
     try {
-      const resp = await api.post<Service>(
+      const resp = await api.post(
         `/booking-endpoints/services/${id}/quote`,
         data
       );

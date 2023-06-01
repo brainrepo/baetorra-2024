@@ -1,12 +1,19 @@
 <template>
-  <private-view title="Errore nel servizio" small-header="Small header" v-if="serviceError || !service">
+  <private-view
+    title="Errore nel servizio"
+    small-header="Small header"
+    v-if="serviceError || !service"
+  >
     <template #navigation>
       <Sidebar />
     </template>
     error
-   
   </private-view>
-  <private-view title="Loading" small-header="Small header" v-if="serviceLoading">
+  <private-view
+    title="Loading"
+    small-header="Small header"
+    v-if="serviceLoading"
+  >
     <v-skeleton-loader type="list-item-icon" />
   </private-view>
   <private-view
@@ -21,7 +28,11 @@
     <div class="main-quote">
       <div>
         <v-sheet class="fieldgroup">
-          <v-date-picker type="date" v-model="request.date" v-if="request?.date" />
+          <v-date-picker
+            type="date"
+            v-model="request.date"
+            v-if="request?.date"
+          />
 
           <div class="form-field-container">
             <v-text-overflow text="Shift"></v-text-overflow>
@@ -49,27 +60,76 @@
             />
           </div>
         </v-sheet>
-        <v-button :disabled="!request || !isRequestValid(request)" :loading="quoteLoading">Book</v-button>
+   
       </div>
       <div>
-     ddd
+        <ErrorNotice
+          :error-code="quote.code"
+          v-if="quote.status === 'error'"
+        ></ErrorNotice>
+
+
+        <QuotePrice 
+          v-if="quote && quote.status === 'success' && request && isRequestValid(request)" :prices="quote.prices" />
+
+  
+
+        <v-sheet class="form-field-container">
+          <div>Customer name</div>
+
+          <div class="inline">
+            <v-input
+              v-model="customer.name"
+            ></v-input></div
+        >
+        <div>Phone</div>
+
+          <div class="inline">
+            <v-input
+              v-model="customer.phone"
+            ></v-input></div
+        >
+
+        <div>Email</div>
+
+          <div class="inline">
+            <v-input
+              v-model="customer.email"
+            ></v-input></div
+        ></v-sheet>
+        <div>
+          <v-button
+          :disabled="
+            !request ||
+            !isRequestValid(request) ||
+            !quote ||
+            quote.status === 'error'
+          "
+          :loading="quoteLoading"
+          >Book</v-button
+        ></div>
       </div>
     </div>
     <template #sidebar>
-      <sidebar-detail icon="info_outline" title="info" close  v-if="service?.seller_helper_notice" >
-        <div
-          v-md="service?.seller_helper_notice"
-          class="page-description"
-        />
+      <sidebar-detail
+        icon="info_outline"
+        title="info"
+        close
+        v-if="service?.seller_helper_notice"
+      >
+        <div v-md="service?.seller_helper_notice" class="page-description" />
       </sidebar-detail>
     </template>
-    {{ request }}
+    {{ request }} 
+        {{ quote }} {{customer}}
   </private-view>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import Sidebar from "../components/Sidebar.vue";
+import ErrorNotice from "../components/ErrorNotice.vue";
+import QuotePrice from "../components/QuotePrice.vue";
 import { useRoute } from "vue-router";
 import { parse } from "marked";
 import Variant from "../components/Variant.vue";
@@ -78,50 +138,71 @@ import { useApi, useStores } from "@directus/extensions-sdk";
 import {
   Request,
   initializeRequestByService,
-  isRequestValid
+  isRequestValid,
 } from "../utils/index";
-import { useGetService } from "../composables/useGetService"
-import { useGetQuote } from "../composables/useGetQuote"
+import { useGetService } from "../composables/useGetService";
+import { useGetQuote } from "../composables/useGetQuote";
 
 export default defineComponent({
-  components: { Sidebar, Variant },
+  components: { Sidebar, Variant, ErrorNotice, QuotePrice },
   props: ["serviceId"],
   setup({ serviceId }) {
     const route = useRoute();
     const { useUserStore } = useStores();
-    const { currentUser } = useUserStore()
+    const { currentUser } = useUserStore();
+    const customer = ref({name: '', phone: '', email: ''});
+    const isSuccess = ref(false)
 
-    const {service, serviceLoading, serviceError, loadData} = useGetService()
-    const {quote, quoteLoading, quoteError, getQuote} = useGetQuote()
+    const { service, serviceLoading, serviceError, loadData } = useGetService();
+    const { quote, quoteLoading, quoteError, getQuote } = useGetQuote();
     const request = ref<Request>();
 
-    watch(
-      service,
-      (s) => {
-        if(!s) return 
-        request.value = initializeRequestByService(s, currentUser.id);
-      }
-    );
+    watch(service, (s) => {
+      if (!s) return;
+      request.value = initializeRequestByService(s, currentUser.id);
+    });
     watch(
       () => route.params.serviceId,
       (newId) => {
-        if(typeof newId === 'undefined') {
-          return
+        if (typeof newId === "undefined") {
+          return;
         }
-        if(Array.isArray(newId)) {
-          newId = newId[0]
+        if (Array.isArray(newId)) {
+          newId = newId[0];
         }
         loadData(newId);
-      },{immediate: true}
+      },
+      { immediate: true }
     );
 
-    watch(request, () => {
-      if(service.value && request.value) {
-        getQuote(service.value.id, request.value)
-      }
-    }, {deep: true})
+    watch(
+      request,
+      () => {
+        if (service.value && request.value) {
+          getQuote(service.value.id, request.value);
+        }
+      },
+      { deep: true }
+    );
 
-    return { service, request, parse, serviceLoading, serviceError, isRequestValid, quoteLoading, quote };
+    watch(quote, 
+    () => {
+      isSuccess.value = quote && quote.status === 'success' && request && isRequestValid(request)
+    },
+      { deep: true })
+
+    return {
+      service,
+      request,
+      parse,
+      serviceLoading,
+      serviceError,
+      isRequestValid,
+      quoteLoading,
+      quote,
+      customer,
+      isSuccess
+    };
   },
 });
 </script>
@@ -149,5 +230,11 @@ export default defineComponent({
     width: 100%;
     padding: 0;
   }
+}
+.error-color {
+  color: var(--danger);
+}
+.form-field-container {
+  margin: 10px 0;
 }
 </style>

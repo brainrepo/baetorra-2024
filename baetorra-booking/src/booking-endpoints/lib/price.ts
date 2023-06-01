@@ -10,7 +10,7 @@ export async function calculatePrice(
   getPricesByVariantSellerShift: GetPricesByVariantSellerShift
 ) {
   const variants = _.pickBy(request.variants, (e) => e > 0);
-  let prices: Record<string, VariantPrice | undefined> = {};
+  let prices: Record<string, VariantPrice> = {};
 
   for (const variant in variants) {
     const p = await getPricesByVariantSellerShift(

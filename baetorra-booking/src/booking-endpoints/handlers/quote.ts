@@ -7,9 +7,9 @@ import _ from "lodash";
 import { calculateAvailability } from "../lib/availability";
 import { calculatePrice } from "../lib/price";
 
-const AVAILABILITY_ERROR = "availability error" as const;
-const PRICE_ERROR = "price error" as const;
-const SECURITY_ERROR = "security error" as const;
+const AVAILABILITY_ERROR = "availability_error" as const;
+const PRICE_ERROR = "price_error" as const;
+const SECURITY_ERROR = "security_error" as const;
 const VALIDATION_ERROR = "validation error" as const;
 const SUCCESS = "success" as const;
 
@@ -25,7 +25,7 @@ type ErrorResponse = {
 
 type SuccessResponse = {
   status: "success";
-  prices: Record<string, VariantPrice | undefined>;
+  prices: Record<string, VariantPrice>;
   code: typeof SUCCESS;
 };
 
