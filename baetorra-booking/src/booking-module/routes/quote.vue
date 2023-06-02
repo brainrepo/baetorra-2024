@@ -151,7 +151,6 @@ export default defineComponent({
     const { useUserStore } = useStores();
     const { currentUser } = useUserStore();
     const customer = ref({name: '', phone: '', email: ''});
-    const isSuccess = ref(false)
 
     const { service, serviceLoading, serviceError, loadData } = useGetService();
     const { quote, quoteLoading, quoteError, getQuote } = useGetQuote();
@@ -185,12 +184,6 @@ export default defineComponent({
       { deep: true }
     );
 
-    watch(quote, 
-    () => {
-      isSuccess.value = quote && quote.status === 'success' && request && isRequestValid(request)
-    },
-      { deep: true })
-
     return {
       service,
       request,
@@ -200,8 +193,7 @@ export default defineComponent({
       isRequestValid,
       quoteLoading,
       quote,
-      customer,
-      isSuccess
+      customer
     };
   },
 });
