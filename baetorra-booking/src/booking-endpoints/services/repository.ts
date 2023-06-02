@@ -37,6 +37,17 @@ const Repository = (
       amount: number;
     }[]
   >;
+  saveReservation(reservation: {
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    reservation: string;
+    lockers: any;
+    bookedDate: string;
+    service: string;
+    shift: string;
+    seller: string;
+  }): Promise<string>;
 } => {
   const accountability = { admin: true, app: true };
 
@@ -143,6 +154,45 @@ const Repository = (
           variant: { id: { _eq: variantId } },
         },
       });
+    },
+
+    async saveReservation({
+      customerName,
+      customerEmail,
+      customerPhone,
+      reservation,
+      lockers,
+      bookedDate,
+      service,
+      shift,
+      seller,
+    }) {
+      const reservationService = new ItemsService("reservations", {
+        schema,
+        accountability: { admin: true, app: true },
+      });
+      const lockerService = new ItemsService("resource_locker", {
+        schema,
+        accountability: { admin: true, app: true },
+      });
+
+      const id = await reservationService.createOne({
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        reservation,
+        booked_date: bookedDate,
+        booking_date: new Date(),
+        service,
+        shift,
+        seller,
+        status: true,
+        user_created: seller,
+      });
+
+      await lockerService.createMany(lockers);
+
+      return id;
     },
   };
 };

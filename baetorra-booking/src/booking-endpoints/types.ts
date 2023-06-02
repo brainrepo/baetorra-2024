@@ -30,6 +30,17 @@ export interface Request {
   seller: string;
 }
 
+export interface BookingRequest {
+  service: string;
+  shift: string;
+  date: string;
+  variants: Record<string, number>;
+  seller: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+}
+
 export interface Price {
   color: string;
   fee: number;

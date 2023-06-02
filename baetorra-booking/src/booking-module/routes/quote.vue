@@ -60,7 +60,6 @@
             />
           </div>
         </v-sheet>
-   
       </div>
       <div>
         <ErrorNotice
@@ -68,46 +67,53 @@
           v-if="quote.status === 'error'"
         ></ErrorNotice>
 
-
-        <QuotePrice 
-          v-if="quote && quote.status === 'success' && request && isRequestValid(request)" :prices="quote.prices" />
-
-  
+        <QuotePrice
+          v-if="
+            quote &&
+            quote.status === 'success' &&
+            request &&
+            isRequestValid(request)
+          "
+          :prices="quote.prices"
+        />
 
         <v-sheet class="form-field-container">
           <div>Customer name</div>
 
           <div class="inline">
-            <v-input
-              v-model="customer.name"
-            ></v-input></div
-        >
-        <div>Phone</div>
+            <v-input v-model="customer.name"></v-input>
+          </div>
+          <div>Phone</div>
 
           <div class="inline">
-            <v-input
-              v-model="customer.phone"
-            ></v-input></div
-        >
+            <v-input v-model="customer.phone"></v-input>
+          </div>
 
-        <div>Email</div>
+          <div>Email</div>
 
           <div class="inline">
-            <v-input
-              v-model="customer.email"
-            ></v-input></div
+            <v-input v-model="customer.email"></v-input></div
         ></v-sheet>
         <div>
           <v-button
-          :disabled="
-            !request ||
-            !isRequestValid(request) ||
-            !quote ||
-            quote.status === 'error'
-          "
-          :loading="quoteLoading"
-          >Book</v-button
-        ></div>
+            :disabled="
+              !request ||
+              !isRequestValid(request) ||
+              !quote ||
+              quote.status === 'error'
+            "
+            :loading="quoteLoading"
+            @click="() =>
+              book(service.id, {
+                customerName: customer.name,
+                customerPhone: customer.phone,
+                customerEmail: customer.email,
+                ...request ?? {}
+              })
+            "
+            >Book</v-button
+          >
+        </div>
       </div>
     </div>
     <template #sidebar>
@@ -120,8 +126,8 @@
         <div v-md="service?.seller_helper_notice" class="page-description" />
       </sidebar-detail>
     </template>
-    {{ request }} 
-        {{ quote }} {{customer}}
+    {{ request }}
+    {{ quote }} {{ customer }}
   </private-view>
 </template>
 
@@ -142,6 +148,7 @@ import {
 } from "../utils/index";
 import { useGetService } from "../composables/useGetService";
 import { useGetQuote } from "../composables/useGetQuote";
+import { useBook } from "../composables/useBook";
 
 export default defineComponent({
   components: { Sidebar, Variant, ErrorNotice, QuotePrice },
@@ -150,10 +157,12 @@ export default defineComponent({
     const route = useRoute();
     const { useUserStore } = useStores();
     const { currentUser } = useUserStore();
-    const customer = ref({name: '', phone: '', email: ''});
+    const customer = ref({ name: "", phone: "", email: "" });
 
     const { service, serviceLoading, serviceError, loadData } = useGetService();
     const { quote, quoteLoading, quoteError, getQuote } = useGetQuote();
+    const { reservationId, bookLoading, bookError, book } = useBook();
+
     const request = ref<Request>();
 
     watch(service, (s) => {
@@ -193,7 +202,8 @@ export default defineComponent({
       isRequestValid,
       quoteLoading,
       quote,
-      customer
+      customer,
+      book,
     };
   },
 });

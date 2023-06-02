@@ -2,7 +2,7 @@ import type { Response } from "express";
 import { getUserId } from "../../shared/endpoints/user";
 import { validateRequest } from "../invariants/booking-request";
 import Repository from "../services/repository";
-import { Request, VariantPrice } from "../types";
+import { BookingRequest, Request, VariantPrice } from "../types";
 import _ from "lodash";
 import { calculateAvailability } from "../lib/availability";
 import { calculatePrice } from "../lib/price";
@@ -25,8 +25,8 @@ type ErrorResponse = {
 
 type SuccessResponse = {
   status: "success";
-  prices: Record<string, VariantPrice>;
   code: typeof SUCCESS;
+  id: string;
 };
 
 export default (ItemsService: any) =>
@@ -40,7 +40,7 @@ export default (ItemsService: any) =>
       return;
     }
 
-    const request: Request = req.body;
+    const request: BookingRequest = req.body;
     const service = await repository.getSellableServiceInfo(serviceId, userId);
 
     if (!validateRequest(request, service, userId)) {
@@ -75,7 +75,39 @@ export default (ItemsService: any) =>
         return;
       }
 
-      res.send({ status: "success", prices, code: SUCCESS });
+      // Booking
+
+      const id = await repository.saveReservation({
+        customerName: request.customerName,
+        customerEmail: request.customerEmail,
+        customerPhone: request.customerPhone,
+        shift: request.shift,
+        service: serviceId,
+        seller: userId,
+        bookedDate: request.date,
+        reservation: JSON.stringify(prices),
+        lockers: lockers.map((l) => ({
+          ...l,
+          status: true,
+        })),
+      });
+
+      console.log("book", {
+        customerName: request.customerName,
+        customerEmail: request.customerEmail,
+        customerPhone: request.customerPhone,
+        shift: request.shift,
+        service: serviceId,
+        seller: userId,
+        bookedDate: request.date,
+        reservation: JSON.stringify(prices),
+        lockers: lockers.map((l) => ({
+          ...l,
+          status: true,
+        })),
+      });
+
+      res.send({ status: "success", id, code: SUCCESS });
     } catch (e) {
       res.send({ status: "error", prices: prices, code: AVAILABILITY_ERROR });
     }

@@ -66,7 +66,7 @@ export default defineComponent({
           .finally(() => (loading.value = false));
       }
     };
-    watch(amount, debounce(setAvailability, 400) as () => void);
+    watch(amount, debounce(setAvailability, 1500) as () => void);
 
     return { loading, amount, id, setFocus, isFocus, reserved, reservedTemp };
   },

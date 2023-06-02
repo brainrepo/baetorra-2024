@@ -1,5 +1,5 @@
 import { useApi } from "@directus/extensions-sdk";
-import { Service, Request } from "../utils/index";
+import { Request } from "../utils/index";
 import { ref } from "vue";
 
 export function useGetQuote() {
