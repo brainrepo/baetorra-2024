@@ -17,10 +17,10 @@ type ErrorResponse = {
   status: "error";
   prices?: Record<string, VariantPrice | undefined>;
   code:
-    | typeof AVAILABILITY_ERROR
-    | typeof PRICE_ERROR
-    | typeof VALIDATION_ERROR
-    | typeof SECURITY_ERROR;
+  | typeof AVAILABILITY_ERROR
+  | typeof PRICE_ERROR
+  | typeof VALIDATION_ERROR
+  | typeof SECURITY_ERROR;
 };
 
 type SuccessResponse = {
@@ -85,7 +85,7 @@ export default (ItemsService: any) =>
         service: serviceId,
         seller: userId,
         bookedDate: request.date,
-        reservation: JSON.stringify(prices),
+        prices,
         lockers: lockers.map((l) => ({
           ...l,
           status: true,

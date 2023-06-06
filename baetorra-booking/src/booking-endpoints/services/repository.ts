@@ -41,7 +41,12 @@ const Repository = (
     customerName: string;
     customerEmail: string;
     customerPhone: string;
-    reservation: string;
+    prices: Record<string, {
+      amount: number,
+      value: number,
+      fees: number,
+      total: number,
+    }>;
     lockers: any;
     bookedDate: string;
     service: string;
@@ -160,7 +165,7 @@ const Repository = (
       customerName,
       customerEmail,
       customerPhone,
-      reservation,
+      prices,
       lockers,
       bookedDate,
       service,
@@ -175,12 +180,16 @@ const Repository = (
         schema,
         accountability: { admin: true, app: true },
       });
+      const variantReservedService = new ItemsService("variant_reserved", {
+        schema,
+        accountability: { admin: true, app: true },
+      });
+
 
       const id = await reservationService.createOne({
         customer_name: customerName,
         customer_email: customerEmail,
         customer_phone: customerPhone,
-        reservation,
         booked_date: bookedDate,
         booking_date: new Date(),
         service,
@@ -190,7 +199,18 @@ const Repository = (
         user_created: seller,
       });
 
-      await lockerService.createMany(lockers);
+      await lockerService.createMany(lockers.map((l: any) => ({ ...l, reservation: id })));
+      await variantReservedService.createMany(
+        Object.keys(prices).map((key: string) => ({
+          amount: prices[key]!.amount,
+          variant: key,
+          value: prices[key]!.value,
+          fee: prices[key]!.fees,
+          total: prices[key]!.total,
+          reservation: id
+        }))
+      )
+
 
       return id;
     },
