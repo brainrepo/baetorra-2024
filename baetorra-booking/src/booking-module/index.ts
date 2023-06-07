@@ -1,6 +1,7 @@
 import { defineModule } from "@directus/extensions-sdk";
 import IndexComponent from "./routes/index.vue";
 import QuoteComponent from "./routes/quote.vue";
+import TicketComponent from "./routes/ticket.vue";
 
 export default defineModule({
   id: "booking-module",
@@ -15,6 +16,11 @@ export default defineModule({
     {
       path: "quote/:serviceId",
       component: QuoteComponent,
+      props: true,
+    },
+    {
+      path: "ticket/:reservationId",
+      component: TicketComponent,
       props: true,
     },
   ],
