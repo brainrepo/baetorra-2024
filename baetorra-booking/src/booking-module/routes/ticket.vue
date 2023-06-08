@@ -4,12 +4,18 @@
 
     <div>
       <button @click="print">print</button>
-      <div :class="{ document: true, isFullscreen: isFullscreen }" id="ticket">
+
+      <div>{{ reservation }}</div>
+      <div
+        v-if="reservation"
+        :class="{ document: true, isFullscreen: isFullscreen }"
+        id="ticket"
+      >
         <div class="header">
           <div class="title">Boarding Pass</div>
           <div>
             <div class="reservation-id">{{ reservationId }}</div>
-            <div class="reservation-date">{{ reservation.date }}</div>
+            <div class="reservation-date">{{ reservation?.data.booking_date }}</div>
           </div>
         </div>
         <div class="body-container">
@@ -24,126 +30,84 @@
               <div class="info-block">
                 <div>
                   <div class="subject">Reservation date</div>
-                  <div class="big-value">24 June 2023</div>
-                  <div class="big-value-2">9:00 - 18:00</div>
+                  <div class="big-value">{{ reservation.data.booked_date }}</div>
+                  <div class="big-value-2" v-if="reservation.data.shift?.from">{{ reservation.data.shift?.from }} - {{ reservation.data.shift?.to }}</div>
+                  
+
                 </div>
                 <div>
                   <div class="subject">Passenger</div>
-                  <div class="big-value-1">Mario Maria Ernandez Rossi</div>
-                  <div class="normal-text">marioernandez@pipposadasdsa.it</div>
-                  <div class="normal-text">+39 3492977246</div>
+                  <div class="big-value-1">{{ reservation.data.customer_name }}</div>
+                  <div class="normal-text">{{ reservation.data.customer_email }}</div>
+                  <div class="normal-text">{{ reservation.data.customer_phone }}</div>
                 </div>
               </div>
             </div>
             <div class="variants block">
               <div class="big-value-1 padding-y">Prenotazione</div>
-              <table class=" normal-text-plus">
-                <tr>
-                  <td>Adulti</td>
-                  <td class="center padding-x">2</td>
-                  <td>200.00&euro;</td>
+              <table class="normal-text-plus">
+                <tr v-for="variant in reservation.data.variants">
+                  <td>{{ variant.variant.name }}</td>
+                  <td class="center padding-x">{{ variant.amount }}</td>
+                  <td>{{variant.total}}&euro;</td>
                 </tr>
                 <tr>
-                  <td>Bambini</td>
-                  <td class="center padding-x">1</td>
-                  <td>79.40&euro;</td>
-                </tr>
-                <tr>
-                  <td>Bambini</td>
-                  <td class="center padding-x">1</td>
-                  <td>79.40&euro;</td>
-                </tr>
-                <tr>
-                  <td>Bambini</td>
-                  <td class="center padding-x">1</td>
-                  <td>79.40&euro;</td>
-                </tr>
-                <tr>
-                  <td>Bambini</td>
-                  <td class="center padding-x">1</td>
-                  <td>79.40&euro;</td>
-                </tr>
-                <tr>
-                  <td>Bambini</td>
-                  <td class="center padding-x">1</td>
-                  <td>79.40&euro;</td>
-                </tr>
-                <tr>
-                  <td colspan="2">Totale</td>
-                  <td>79.40&euro;</td>
+                  <td colspan="2" class="subject">Totale</td>
+                  <td>{{reservation.data.variants.reduce((a,e) => Number(a) + Number(e.total), 0)}}&euro;</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="subject">Saldato alla prenotazione</td>
-                  <td>79.40&euro;</td>
+                  <td>//&euro;</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="subject">Da saldare alla partenza</td>
-                  <td>394.10&euro;</td>
+                  <td>//&euro;</td>
                 </tr>
               </table>
             </div>
-            <div class="qr-codes ">
+            <div class="qr-codes">
               <div class="big-value-1">Link utili</div>
               <div class="qr-grid">
-                <div class="qr-frame">
-                <qrcode-vue
-                  value="https://goo.gl/maps/JKDpz7mBfCAB3RKbA"
-                  :size="60"
-                  level="H"
-                  render-as="svg"
-                />
-                <div class="subject">Boarding dock</div>
+                <div class="qr-frame" v-for="qr in reservation.data.service.links">
+                  <qrcode-vue
+                    :value="qr.link"
+                    :size="60"
+                    level="H"
+                    render-as="svg"
+                  />
+                  <div class="subject">{{ qr.description }}</div>
+                </div>
               </div>
-              <div class="qr-frame">
-                <qrcode-vue
-                  value="https://goo.gl/maps/JKDpz7mBfCAB3RKbA"
-                  :size="60"
-                  level="H"
-                  render-as="svg"
-                />
-                <div class="subject">Boarding dock</div>
-              </div>
-              </div>
-            
             </div>
             <div class="block">
-              <div class="big-value-1 padding-y">Contract</div> 
-              <div class="normal-text">
-                Scopri le meraviglie naturali dell’Arcipelago di La Maddalena con le nostre crociere esclusive, il nostro obiettivo è quello di regalarvi una giornata indimenticabile in uno dei posti più belli al mondo. Pensiamo a tutto noi: vi coccoliamo a bordo, lunghe soste in spiaggia, tuffi dalla b
+              <div class="big-value-1 padding-y">Contract</div>
+              <div class="normal-text" v-html="marked.parse(reservation.data.service.contract)">
               </div>
             </div>
           </div>
           <div class="sidebar">
             <div class="block">
-              <div class="big-value padding-y">Festina Lente</div> 
+              <div class="big-value padding-y">{{ reservation.data.service.name }}</div>
               <div class="normal-text">
-                Scopri le meraviglie naturali dell’Arcipelago di La Maddalena con le nostre crociere esclusive, il nostro obiettivo è quello di regalarvi una giornata indimenticabile in uno dei posti più belli al mondo. Pensiamo a tutto noi: vi coccoliamo a bordo, lunghe soste in spiaggia, tuffi dalla barca. Ma non solo, perché vi faremo gustare anche un ottimo pranzo a base di prodotti tipici locali. E abbiamo anche soluzioni per vegani e vegetariani.
+                {{ reservation.data.service.description }}
               </div>
               <div class="padding-y">
                 <div class="subject">Operato da</div>
                 <div class="normal-text">
-                  Riviera di Gallura <br>Regione Guardioli, <br>La Maddalena OT
+                  {{ reservation.data.service.supplier.company }} <br /><span v-html="reservation.data.service.supplier.address.replace('\n', '<br />')"></span><br />{{ reservation.data.service.supplier.phone }}
                 </div>
               </div>
               <div>
                 <div class="subject">Venduto da</div>
                 <div class="normal-text">
-                  Baetorra <br>Via nazionale, 123 <br>Budoni OT
+                  {{ reservation.data.seller.company }} <br /><span v-html="reservation.data.seller.address.replace('\n', '<br />') "></span><br />{{ reservation.data.seller.phone }}
                 </div>
               </div>
-              
             </div>
             <div class="block">
-              <div class="big-value-1 padding-y">Ricordati</div> 
-              <div class="normal-text">
-              <ol>
-                <li>Prepara l'equipaggiamento adeguato: Assicurati di portare con te tutto il necessario per l'escursione, come scarponi da trekking adatti, abbigliamento adeguato alle condizioni meteorologiche, zaino, acqua, cibo leggero, kit di pronto soccorso e una mappa o una bussola.</li>
-                <li>
-Informa qualcuno del tuo itinerario: Prima di partire, assicurati di comunicare a qualcuno il tuo itinerario, inclusi il punto di partenza, i punti di arrivo previsti, i tempi approssimativi di cammino e il momento in cui prevedi di ritornare. In questo modo, se si verifica un imprevisto, qualcuno sa dove cercarti.</li>
-              </ol>
+              <div class="big-value-1 padding-y">Ricordati</div>
+              <div class="normal-text" v-html="marked.parse(reservation.data.service.memo)">
               </div>
-            
-              
             </div>
           </div>
         </div>
@@ -154,24 +118,33 @@ Informa qualcuno del tuo itinerario: Prima di partire, assicurati di comunicare 
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, toRefs, watch } from "vue";
+import { useGetReservation } from "../composables/useGetReservation";
 import QrcodeVue from "qrcode.vue";
+import { useItems } from "@directus/extensions-sdk";
+import * as marked from 'marked'
 
 export default defineComponent({
   components: { QrcodeVue },
   props: ["reservationId"],
-  setup({ reservationId }) {
+  setup(props) {
+    const { collection, filter, search } = toRefs(props);
+
+
     const isFullscreen = ref(false);
+    const { loadData, reservation } = useGetReservation();
+
+    loadData(props.reservationId);
 
     const print = () => {
       isFullscreen.value = true;
     };
 
-    const reservation = {
-      date: "12 August 2023 11:00",
-    };
+    // const reservation = {
+    //   date: "12 August 2023 11:00",
+    // };
 
-    return { reservation, print, isFullscreen };
+    return { reservation, print, isFullscreen, marked };
   },
 });
 </script>
@@ -280,15 +253,15 @@ export default defineComponent({
       }
       .qr-codes {
         .qr-grid {
-          padding-top:15px;
-            > * + * {
-          margin-left: 10px;
-        }
-      .qr-frame{
-        background: #ebebeb; 
-        padding: 5px;
-        text-overflow: flex-wrap;
-      }
+          padding-top: 15px;
+          > * + * {
+            margin-left: 10px;
+          }
+          .qr-frame {
+            background: #ebebeb;
+            padding: 5px;
+            text-overflow: flex-wrap;
+          }
           div {
             text-align: center;
           }
@@ -307,7 +280,7 @@ export default defineComponent({
       flex: 3;
       flex-shrink: 0;
       flex-grow: 1;
-      div{
+      div {
         flex-grow: 1;
       }
     }
@@ -365,10 +338,11 @@ export default defineComponent({
 .padding-x {
   padding: 0 10px;
 }
-ol, li {
+ol,
+li {
   padding: 5px;
   margin: 5px;
   text-indent: 0;
-   list-style-type: 0;
+  list-style-type: 0;
 }
 </style>
