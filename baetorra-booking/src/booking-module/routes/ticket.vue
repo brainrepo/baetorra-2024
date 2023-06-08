@@ -3,9 +3,9 @@
     <template #navigation> actions </template>
 
     <div>
-      <button @click="print">print</button>
-
-      <div>{{ reservation }}</div>
+      
+      <button @click="print" v-if="reservationLoading">loading</button>
+      <button @click="print" v-else>print</button>
       <div
         v-if="reservation"
         :class="{ document: true, isFullscreen: isFullscreen }"
@@ -132,19 +132,26 @@ export default defineComponent({
 
 
     const isFullscreen = ref(false);
-    const { loadData, reservation } = useGetReservation();
+    const { loadData, reservation, reservationLoading } = useGetReservation();
 
     loadData(props.reservationId);
 
     const print = () => {
       isFullscreen.value = true;
+      setTimeout(() => {
+        window.print()
+      },100)
+  
     };
+    addEventListener("afterprint", (event) => {
+      isFullscreen.value = false;  
+    });
 
     // const reservation = {
     //   date: "12 August 2023 11:00",
     // };
 
-    return { reservation, print, isFullscreen, marked };
+    return { reservation, print, isFullscreen, marked, reservationLoading };
   },
 });
 </script>
@@ -152,6 +159,7 @@ export default defineComponent({
 @import "https://cdn.tailwindcss.com";
 .document {
   width: 100%;
+  visibility: hidden;
   display: flex;
   flex-direction: column;
   > * + * {
@@ -159,6 +167,7 @@ export default defineComponent({
   }
   &.isFullscreen {
     position: fixed;
+    visibility: visible;
     top: 0;
     left: 0;
     width: 100vw;
