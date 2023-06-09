@@ -1,11 +1,13 @@
 <template>
-  <private-view :title="Ticket" small-header="Small header">
-    <template #navigation> actions </template>
+
 
     <div>
       
-      <button @click="print" v-if="reservationLoading">loading</button>
-      <button @click="print" v-else>print</button>
+      <div class="trigger-button">
+        <button v-if="reservationLoading">loading</button>
+      </div>
+      
+
       <div
         v-if="reservation"
         :class="{ document: true, isFullscreen: isFullscreen }"
@@ -113,8 +115,7 @@
         </div>
       </div>
     </div>
-    <template #sidebar> other sidebar </template>
-  </private-view>
+
 </template>
 
 <script lang="ts">
@@ -134,17 +135,21 @@ export default defineComponent({
     const isFullscreen = ref(false);
     const { loadData, reservation, reservationLoading } = useGetReservation();
 
+    watch(reservation, ()=> {
+      isFullscreen.value = true;
+      setImmediate(() => window.print())
+    })
+
     loadData(props.reservationId);
 
-    const print = () => {
-      isFullscreen.value = true;
-      setTimeout(() => {
-        window.print()
-      },100)
-  
-    };
+
+    
     addEventListener("afterprint", (event) => {
       isFullscreen.value = false;  
+      setImmediate(() => {
+        window.location.replace(`/admin/content/reservations/${props.reservationId}`); 
+      })
+      
     });
 
     // const reservation = {
@@ -156,7 +161,14 @@ export default defineComponent({
 });
 </script>
 <style scope lang="scss">
-@import "https://cdn.tailwindcss.com";
+.trigger-button{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
 .document {
   width: 100%;
   visibility: hidden;

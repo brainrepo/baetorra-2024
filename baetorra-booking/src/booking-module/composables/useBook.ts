@@ -24,7 +24,7 @@ export function useBook() {
         data
       );
 
-      bookError.value = resp.data;
+      window.location.replace(`/admin/content/reservations/${resp.data.id}`);
     } catch (e) {
       bookError.value = true;
     } finally {
