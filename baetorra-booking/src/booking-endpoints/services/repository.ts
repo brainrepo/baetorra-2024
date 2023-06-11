@@ -41,18 +41,25 @@ const Repository = (
     customerName: string;
     customerEmail: string;
     customerPhone: string;
-    prices: Record<string, {
-      amount: number,
-      value: number,
-      fees: number,
-      total: number,
-    }>;
+    prices: Record<
+      string,
+      {
+        amount: number;
+        value: number;
+        fees: number;
+        total: number;
+      }
+    >;
     lockers: any;
     bookedDate: string;
     service: string;
     shift: string;
     seller: string;
   }): Promise<string>;
+  voidReservation(
+    reservationId: string,
+    userId: string
+  ): Promise<[boolean, Error | null]>;
 } => {
   const accountability = { admin: true, app: true };
 
@@ -185,7 +192,6 @@ const Repository = (
         accountability: { admin: true, app: true },
       });
 
-
       const id = await reservationService.createOne({
         customer_name: customerName,
         customer_email: customerEmail,
@@ -199,7 +205,9 @@ const Repository = (
         user_created: seller,
       });
 
-      await lockerService.createMany(lockers.map((l: any) => ({ ...l, reservation: id })));
+      await lockerService.createMany(
+        lockers.map((l: any) => ({ ...l, reservation: id }))
+      );
       await variantReservedService.createMany(
         Object.keys(prices).map((key: string) => ({
           amount: prices[key]!.amount,
@@ -207,12 +215,50 @@ const Repository = (
           value: prices[key]!.value,
           fee: prices[key]!.fees,
           total: prices[key]!.total,
-          reservation: id
+          reservation: id,
         }))
-      )
-
+      );
 
       return id;
+    },
+
+    async voidReservation(reservationId, userId) {
+      const reservationService = new ItemsService("reservations", {
+        schema,
+        accountability: { admin: true, app: true },
+      });
+
+      const lockerService = new ItemsService("resource_locker", {
+        schema,
+        accountability: { admin: true, app: true },
+      });
+
+      const reservations = await reservationService.readByQuery({
+        sort: ["id"],
+        fields: ["lockers"],
+        filter: {
+          id: { _eq: reservationId },
+          _or: [
+            { seller: { _eq: userId } },
+            { service: { supplier: { _eq: userId } } },
+          ],
+        },
+      });
+
+      if (reservations.length !== 1) {
+        return [false, null];
+      }
+
+      try {
+        await reservationService.updateOne(reservationId, { status: false });
+        await lockerService.updateMany(reservations[0].lockers, {
+          status: false,
+        });
+      } catch (e) {
+        return [false, e as Error];
+      }
+
+      return [true, null];
     },
   };
 };
