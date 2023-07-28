@@ -137,7 +137,7 @@ export default defineComponent({
 
     watch(reservation, ()=> {
       isFullscreen.value = true;
-      setImmediate(() => window.print())
+      setTimeout(() => window.print(), 300)
     })
 
     loadData(props.reservationId);

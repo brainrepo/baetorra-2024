@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --exec npx directus start",
+    "start": "npx directus start",
     "db:bootstrap": "npx directus database install && npx directus database migrate:latest && npx directus schema apply --yes ./snapshot.yaml",
     "db:snapshot:apply": "npx directus schema apply ./snapshot.yaml",
     "db:snapshot:create": "npx directus schema snapshot ./snapshot.yaml"
@@ -14,7 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "marked": "^4.3.0",
-    "sqlite3": "^5.1.4"
+    "sqlite3": "^5.1.4",
+    "directus": "10.5.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
