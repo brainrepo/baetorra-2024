@@ -14,9 +14,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "directus": "10.5.2",
+    "directus-extension-baetorra-booking": "^1.0.0",
     "marked": "^4.3.0",
-    "sqlite3": "^5.1.4",
-    "directus": "10.5.2"
+    "sqlite3": "^5.1.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
