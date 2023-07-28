@@ -2,3 +2,4 @@
 node_modules
 dist
 extensions/**/node_modules
+**/node_modules
