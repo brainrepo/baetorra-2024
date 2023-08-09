@@ -34,6 +34,8 @@ export async function calculatePrice(
         value: price.price,
         fees: price.fee,
         total: (price.price + price.fee) * variants[variant]!,
+        deposit: price.deposit,
+        balance: price.balance,
       };
     }
   }

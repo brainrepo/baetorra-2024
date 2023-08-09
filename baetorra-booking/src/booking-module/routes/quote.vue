@@ -126,8 +126,7 @@
         <div v-md="service?.seller_helper_notice" class="page-description" />
       </sidebar-detail>
     </template>
-    {{ request }}
-    {{ quote }} {{ customer }}
+ 
   </private-view>
 </template>
 

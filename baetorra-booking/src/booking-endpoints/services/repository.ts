@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Price, Service } from "../types";
+import { Price, Service, VariantPrice } from "../types";
 import { dateOverlap } from "../../shared/date";
 
 type ServiceInfo = any;
@@ -48,6 +48,8 @@ const Repository = (
         value: number;
         fees: number;
         total: number;
+        deposit: number;
+        balance: number;
       }
     >;
     lockers: any;
@@ -135,7 +137,7 @@ const Repository = (
       });
 
       const prices = await priceService.readByQuery({
-        fields: ["price", "fee", "from", "to"],
+        fields: ["price", "fee", "from", "to", "deposit", "balance"],
         filter: {
           variant: { id: { _eq: variantId } },
           shift: {
@@ -215,6 +217,8 @@ const Repository = (
           value: prices[key]!.value,
           fee: prices[key]!.fees,
           total: prices[key]!.total,
+          deposit: prices[key]!.deposit,
+          balance: prices[key]!.balance,
           reservation: id,
         }))
       );

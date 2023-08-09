@@ -32,6 +32,8 @@ export function useGetReservation() {
         "status",
         "variants.variant.name",
         "variants.amount",
+        "variants.balance",
+        "variants.deposit",
         "variants.total",
         "customer_name",
         "customer_email",

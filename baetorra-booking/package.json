@@ -1,6 +1,6 @@
 {
   "name": "directus-extension-baetorra-booking",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "dependencies": {
     "@directus/api": "12.1.2",
     "date-fns": "^2.29.3",

@@ -53,20 +53,22 @@
                   <td class="center padding-x">{{ variant.amount }}</td>
                   <td>{{variant.total}}&euro;</td>
                 </tr>
+               
                 <tr>
                   <td colspan="2" class="subject">Totale</td>
                   <td>{{reservation.data.variants.reduce((a,e) => Number(a) + Number(e.total), 0)}}&euro;</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="subject">Saldato alla prenotazione</td>
-                  <td>//&euro;</td>
+                  <td>{{reservation.data.variants.reduce((a,e) => Number(a) + (Number(e.amount) * Number(e.deposit)), 0)}}&euro;</td>
                 </tr>
                 <tr>
                   <td colspan="2" class="subject">Da saldare alla partenza</td>
-                  <td>//&euro;</td>
+                  <td>{{reservation.data.variants.reduce((a,e) => Number(a) + (Number(e.amount) *  Number(e.balance)), 0)}}&euro;</td>
                 </tr>
               </table>
             </div>
+            <div> {{ JSON.stringify(reservation.data.variants) }}</div>
             <div class="qr-codes">
               <div class="big-value-1">Link utili</div>
               <div class="qr-grid">

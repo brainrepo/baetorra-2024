@@ -48,6 +48,8 @@ export interface Price {
   to: string;
   name: string;
   price: number;
+  deposit: number;
+  balance: number;
 }
 
 // Responses
@@ -59,6 +61,8 @@ export type VariantPrice =
       value: number;
       fees: number;
       total: number;
+      deposit: number;
+      balance: number;
     }
   | {
       type: "error";
