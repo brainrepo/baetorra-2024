@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "directus": "10.13.0",
+    "directus-extension-baetorra-booking": "^2.0.0",
     "marked": "^4.3.0",
     "sqlite3": "^5.1.4"
   },
