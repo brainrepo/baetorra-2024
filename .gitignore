@@ -1,7 +1,0 @@
-.DS_Store
-node_modules
-dist
-extensions/**/node_modules
-**/node_modules
-.env
-extensions/directus-extension-baetorra-booking
