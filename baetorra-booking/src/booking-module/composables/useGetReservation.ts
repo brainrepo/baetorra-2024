@@ -31,6 +31,7 @@ export function useGetReservation() {
         "shift.to",
         "status",
         "variants.variant.name",
+        "variants.*",
         "variants.amount",
         "variants.balance",
         "variants.deposit",
