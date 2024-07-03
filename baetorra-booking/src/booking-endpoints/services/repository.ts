@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Price, Service, VariantPrice } from "../types";
+import { Price, Service } from "../types";
 import { dateOverlap } from "../../shared/date";
 
 type ServiceInfo = any;
@@ -80,6 +80,7 @@ const Repository = (
     },
 
     async getSellableServiceInfo(serviceId, userId) {
+      console.error("teat");
       let services;
       try {
         services = await serviceService.readByQuery({
@@ -89,13 +90,20 @@ const Repository = (
             "sellers.directus_users_id",
             "variants.id",
             "variants.name",
+            "variants.sort",
+            "variants.translations.*",
+            "variants.description",
             "shifts.id",
             "shifts.name",
+            "shifts.from",
+            "shifts.to",
+            "shifts.sort",
           ],
           filter: {
             id: { _eq: serviceId },
             sellers: { directus_users_id: { _eq: userId } },
           },
+          accountability: { admin: true, app: true },
         });
       } catch (e) {
         return undefined;

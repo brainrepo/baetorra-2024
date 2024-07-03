@@ -6,6 +6,11 @@ export default (ItemsService: any, emitter: any) =>
     const repository = Repository(req.schema, ItemsService);
     const userId = getUserId(req) ?? null;
 
+    if (!userId) {
+      res.send({ status: "error", code: "401" });
+      return;
+    }
+
     const service = await repository.getSellableServices(userId);
 
     emitter.emitAction("baetorra-booking-get-services");

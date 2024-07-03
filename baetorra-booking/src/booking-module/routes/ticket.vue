@@ -1,123 +1,177 @@
 <template>
+  <div>
+    <div class="trigger-button">
+      <button v-if="reservationLoading">loading</button>
+    </div>
 
-
-    <div>
-      
-      <div class="trigger-button">
-        <button v-if="reservationLoading">loading</button>
-      </div>
-      
-
-      <div
-        v-if="reservation"
-        :class="{ document: true, isFullscreen: isFullscreen }"
-        id="ticket"
-      >
-        <div class="header">
-          <div class="title">Boarding Pass</div>
-          <div>
-            <div class="reservation-id">{{ reservationId }}</div>
-            <div class="reservation-date">{{ reservation?.data.booking_date }}</div>
+    <div
+      v-if="reservation"
+      :class="{ document: true, isFullscreen: isFullscreen }"
+      id="ticket"
+    >
+      <div class="header">
+        <div class="title">Boarding Pass</div>
+        <div>
+          <div class="reservation-id">{{ reservationId }}</div>
+          <div class="reservation-date">
+            {{
+              format(
+                parseISO(reservation?.data.booking_date),
+                "dd MMMM yyyy HH:mm:ss"
+              )
+            }}
           </div>
         </div>
-        <div class="body-container">
-          <div class="main">
-            <div class="general-info">
-              <qrcode-vue
-                :value="reservationId.slice(0, 8)"
-                :size="180"
-                level="H"
-                render-as="svg"
-              />
-              <div class="info-block">
-                <div>
-                  <div class="subject">Reservation date</div>
-                  <div class="big-value">{{ reservation.data.booked_date }}</div>
-                  <div class="big-value-2" v-if="reservation.data.shift?.from">{{ reservation.data.shift?.from }} - {{ reservation.data.shift?.to }}</div>
-                  
-
+      </div>
+      <div class="body-container">
+        <div class="main">
+          <div class="general-info">
+            <div class="info-block">
+              <div>
+                <div class="subject">Reservation date</div>
+                <div class="big-value">
+                  {{
+                    format(
+                      parseISO(reservation.data.booked_date),
+                      "dd MMMM yyyy"
+                    )
+                  }}
                 </div>
-                <div>
-                  <div class="subject">Passenger</div>
-                  <div class="big-value-1">{{ reservation.data.customer_name }}</div>
-                  <div class="normal-text">{{ reservation.data.customer_email }}</div>
-                  <div class="normal-text">{{ reservation.data.customer_phone }}</div>
-                </div>
-              </div>
-            </div>
-            <div class="variants block">
-              <div class="big-value-1 padding-y">Prenotazione</div>
-              <table class="normal-text-plus">
-                <tr v-for="variant in reservation.data.variants">
-                  <td>{{ variant.variant.name }}</td>
-                  <td class="center padding-x">{{ variant.amount }}</td>
-                  <td>{{variant.total}}&euro;</td>
-                </tr>
-               
-                <tr>
-                  <td colspan="2" class="subject">Totale</td>
-                  <td>{{reservation.data.variants.reduce((a,e) => Number(a) + Number(e.total), 0)}}&euro;</td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="subject">Saldato alla prenotazione</td>
-                  <td>{{reservation.data.variants.reduce((a,e) => Number(a) + (Number(e.amount) * Number(e.deposit)), 0)}}&euro;</td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="subject">Da saldare alla partenza</td>
-                  <td>{{reservation.data.variants.reduce((a,e) => Number(a) + (Number(e.amount) *  Number(e.balance)), 0)}}&euro;</td>
-                </tr>
-              </table>
-            </div>
-            <div> {{ JSON.stringify(reservation.data.variants) }}</div>
-            <div class="qr-codes">
-              <div class="big-value-1">Link utili</div>
-              <div class="qr-grid">
-                <div class="qr-frame" v-for="qr in reservation.data.service.links">
-                  <qrcode-vue
-                    :value="qr.link"
-                    :size="60"
-                    level="H"
-                    render-as="svg"
-                  />
-                  <div class="subject">{{ qr.description }}</div>
-                </div>
-              </div>
-            </div>
-            <div class="block">
-              <div class="big-value-1 padding-y">Contract</div>
-              <div class="normal-text" v-html="marked.parse(reservation.data.service.contract)">
-              </div>
-            </div>
-          </div>
-          <div class="sidebar">
-            <div class="block">
-              <div class="big-value padding-y">{{ reservation.data.service.name }}</div>
-              <div class="normal-text">
-                {{ reservation.data.service.description }}
-              </div>
-              <div class="padding-y">
-                <div class="subject">Operato da</div>
-                <div class="normal-text">
-                  {{ reservation.data.service.supplier.company }} <br /><span v-html="reservation.data.service.supplier.address.replace('\n', '<br />')"></span><br />{{ reservation.data.service.supplier.phone }}
+                <div class="big-value-2" v-if="reservation.data.shift?.from">
+                  {{ reservation.data.shift?.from.substring(0, 5) }} -
+                  {{ reservation.data.shift?.to.substring(0, 5) }}
                 </div>
               </div>
               <div>
-                <div class="subject">Venduto da</div>
+                <div class="subject">Passenger</div>
+                <div class="big-value-1">
+                  {{ reservation.data.customer_name }}
+                </div>
                 <div class="normal-text">
-                  {{ reservation.data.seller.company }} <br /><span v-html="reservation.data.seller.address.replace('\n', '<br />') "></span><br />{{ reservation.data.seller.phone }}
+                  {{ reservation.data.customer_email }}
+                </div>
+                <div class="normal-text">
+                  {{ reservation.data.customer_phone }}
                 </div>
               </div>
             </div>
-            <div class="block">
-              <div class="big-value-1 padding-y">Ricordati</div>
-              <div class="normal-text" v-html="marked.parse(reservation.data.service.memo)">
+          </div>
+          <div class="variants block">
+            <div class="big-value-1 padding-y">Prenotazione</div>
+            <table class="normal-text-plus">
+              <tr v-for="variant in reservation.data.variants">
+                <td>{{ variant.variant.name }}</td>
+                <td class="center padding-x">{{ variant.amount }}</td>
+                <td>{{ variant.total }}&euro;</td>
+              </tr>
+
+              <tr>
+                <td colspan="2" class="subject">Totale</td>
+                <td>
+                  {{
+                    reservation.data.variants.reduce(
+                      (a, e) => Number(a) + Number(e.total),
+                      0
+                    )
+                  }}&euro;
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" class="subject">Saldato alla prenotazione</td>
+                <td>
+                  {{
+                    reservation.data.variants.reduce(
+                      (a, e) =>
+                        Number(a) + Number(e.amount) * Number(e.deposit),
+                      0
+                    )
+                  }}&euro;
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" class="subject">Da saldare alla partenza</td>
+                <td>
+                  {{
+                    reservation.data.variants.reduce(
+                      (a, e) =>
+                        Number(a) + Number(e.amount) * Number(e.balance),
+                      0
+                    )
+                  }}&euro;
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="qr-codes">
+            <div class="big-value-1">Link utili</div>
+            <div class="qr-grid">
+              <div
+                class="qr-frame"
+                v-for="qr in reservation.data.service.links"
+              >
+                <qrcode-vue
+                  :value="qr.link"
+                  :size="60"
+                  level="H"
+                  render-as="svg"
+                />
+                <div class="subject">{{ qr.description }}</div>
               </div>
             </div>
+          </div>
+          <div class="block">
+            <div class="big-value-1 padding-y">Contract</div>
+            <div
+              class="normal-text"
+              v-html="marked.parse(reservation.data.service.contract)"
+            ></div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="block">
+            <div class="big-value padding-y">
+              {{ reservation.data.service.name }}
+            </div>
+            <div class="normal-text">
+              {{ reservation.data.service.description }}
+            </div>
+            <div class="padding-y">
+              <div class="subject">Operato da</div>
+              <div class="normal-text">
+                {{ reservation.data.service.supplier.company }} <br /><span
+                  v-html="
+                    reservation.data.service.supplier.address.replace(
+                      '\n',
+                      '<br />'
+                    )
+                  "
+                ></span
+                ><br />{{ reservation.data.service.supplier.phone }}
+              </div>
+            </div>
+            <div>
+              <div class="subject">Venduto da</div>
+              <div class="normal-text">
+                {{ reservation.data.seller.company }} <br /><span
+                  v-html="
+                    reservation.data.seller.address.replace('\n', '<br />')
+                  "
+                ></span
+                ><br />{{ reservation.data.seller.phone }}
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <div class="big-value-1 padding-y">Ricordati</div>
+            <div
+              class="normal-text"
+              v-html="marked.parse(reservation.data.service.memo)"
+            ></div>
           </div>
         </div>
       </div>
     </div>
-
+  </div>
 </template>
 
 <script lang="ts">
@@ -125,46 +179,51 @@ import { defineComponent, ref, toRefs, watch } from "vue";
 import { useGetReservation } from "../composables/useGetReservation";
 import QrcodeVue from "qrcode.vue";
 import { useItems } from "@directus/extensions-sdk";
-import * as marked from 'marked'
+import { format, parseISO } from "date-fns";
+import * as marked from "marked";
 
 export default defineComponent({
   components: { QrcodeVue },
   props: ["reservationId"],
   setup(props) {
-    const { collection, filter, search } = toRefs(props);
-
-
     const isFullscreen = ref(false);
     const { loadData, reservation, reservationLoading } = useGetReservation();
 
-    watch(reservation, ()=> {
+    watch(reservation, () => {
       isFullscreen.value = true;
-      setTimeout(() => window.print(), 300)
-    })
+      setTimeout(() => window.print(), 300);
+    });
 
     loadData(props.reservationId);
 
-
-    
     addEventListener("afterprint", (event) => {
-      isFullscreen.value = false;  
+      isFullscreen.value = false;
       setImmediate(() => {
-        window.location.replace(`/admin/content/reservations/${props.reservationId}`); 
-      })
-      
+        window.location.replace(
+          `/admin/content/reservations/${props.reservationId}`
+        );
+      });
     });
 
     // const reservation = {
     //   date: "12 August 2023 11:00",
     // };
 
-    return { reservation, print, isFullscreen, marked, reservationLoading };
+    return {
+      reservation,
+      print,
+      isFullscreen,
+      marked,
+      reservationLoading,
+      format,
+      parseISO,
+    };
   },
 });
 </script>
 <style scope lang="scss">
-.trigger-button{
-  display:flex;
+.trigger-button {
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -242,8 +301,7 @@ export default defineComponent({
       max-width: 60vw;
       .general-info {
         background: white;
-        flex-grow: 1;
-        flex-shrink: 1;
+
         display: flex;
         justify-content: center;
         align-items: center;
@@ -275,6 +333,7 @@ export default defineComponent({
         }
       }
       .qr-codes {
+        margin: 10px;
         .qr-grid {
           padding-top: 15px;
           > * + * {
@@ -303,9 +362,6 @@ export default defineComponent({
       flex: 3;
       flex-shrink: 0;
       flex-grow: 1;
-      div {
-        flex-grow: 1;
-      }
     }
   }
 }
@@ -344,8 +400,8 @@ export default defineComponent({
 .normal-text {
   font-style: normal;
   font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
+  font-size: 10px;
+  line-height: 12px;
   color: #000000;
 }
 .normal-text {
